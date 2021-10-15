@@ -69,9 +69,9 @@ namespace Mistaken.BetterSCP.SCP079
                 {
                     var seconds = Mathf.RoundToInt(Respawning.RespawnManager.Singleton._timeForNextSequence - (float)Respawning.RespawnManager.Singleton._stopwatch.Elapsed.TotalSeconds);
                     if (Respawning.RespawnManager.Singleton.NextKnownTeam == Respawning.SpawnableTeamType.NineTailedFox)
-                        msg = $"<color=#00008f><b>Helicopter is landing</b></color> in {seconds:00}s";
+                        msg = string.Format(PluginHandler.Instance.Translation.HelicopterLanding, seconds.ToString("00"));
                     else
-                        msg = $"<color=#008f00><b>Car is arriving</b></color> in {seconds:00}s";
+                        msg = string.Format(PluginHandler.Instance.Translation.CarArriving, seconds.ToString("00"));
                 }
                 else
                 {
@@ -91,12 +91,9 @@ namespace Mistaken.BetterSCP.SCP079
                     }
 
                     if (nearestGenerator != null)
-                    {
-                        var seconds = nearestGenerator.Network_syncTime;
-                        msg = $"<color=yellow>{generators}</color> generator{(generators > 1 ? "s are" : " is")} being activated<br>Time left: <color=yellow>{seconds:00}</color>s<br><size=50%><color=yellow>{string.Join("<br>", gens.Select(i => "[UNKNOWN]"))}</color></size>";
-                    }
+                        msg = string.Format(PluginHandler.Instance.Translation.GeneratorTime, generators, nearestGenerator.Network_syncTime.ToString("00"), string.Join("<br>", gens.Select(i => Map.FindParentRoom(i.gameObject)?.Type.ToString() ?? "[UNKNOWN]")));
                     else if (Events.Handlers.CustomEvents.SCP079.IsBeingRecontained)
-                        msg = $"Recontainment is <color=yellow>ready</color>";
+                        msg = PluginHandler.Instance.Translation.RecontainmentReady;
                 }
 
                 foreach (var player in RealPlayers.List.Where(p => p.Role != RoleType.Scp079))
@@ -107,80 +104,80 @@ namespace Mistaken.BetterSCP.SCP079
 
                 foreach (var player in RealPlayers.Get(RoleType.Scp079))
                 {
-                    string fakeSCP = $"<color=yellow>READY</color>";
-                    string fakeMTF = $"<color=yellow>READY</color>";
-                    string fakeCI = $"<color=yellow>READY</color>";
-                    string fakeTesla = $"<color=yellow>READY</color>";
-                    string scan = $"<color=yellow>READY</color>";
-                    string fullScan = $"<color=yellow>READY</color>";
-                    string blackout = $"<color=yellow>READY</color>";
-                    string warheadStop = $"<color=yellow>READY</color>";
-                    string cassie = $"<color=yellow>READY</color>";
+                    string fakeSCP = PluginHandler.Instance.Translation.Ready;
+                    string fakeMTF = PluginHandler.Instance.Translation.Ready;
+                    string fakeCI = PluginHandler.Instance.Translation.Ready;
+                    string fakeTesla = PluginHandler.Instance.Translation.Ready;
+                    string scan = PluginHandler.Instance.Translation.Ready;
+                    string fullScan = PluginHandler.Instance.Translation.Ready;
+                    string blackout = PluginHandler.Instance.Translation.Ready;
+                    string warheadStop = PluginHandler.Instance.Translation.Ready;
+                    string cassie = PluginHandler.Instance.Translation.Ready;
 
                     if (FakeSCPCommand.ReqLvl > player.Level + 1)
-                        fakeSCP = $"<color=red>Require <color=yellow>{FakeSCPCommand.ReqLvl}</color> lvl</color>";
+                        fakeSCP = string.Format(PluginHandler.Instance.Translation.RequireLevel, FakeSCPCommand.ReqLvl);
                     else if (!FakeSCPCommand.IsReady)
-                        fakeSCP = $"<color=red>Require <color=yellow>{Math.Round(new TimeSpan(FakeSCPCommand.TimeLeft).TotalSeconds)}</color>s</color>";
+                        fakeSCP = string.Format(PluginHandler.Instance.Translation.RequireCooldown, Math.Round(new TimeSpan(FakeSCPCommand.TimeLeft).TotalSeconds));
                     else if (FakeSCPCommand.Cost > player.Energy)
-                        fakeSCP = $"<color=red>Require <color=yellow>{FakeSCPCommand.Cost}</color> AP</color>";
+                        fakeSCP = string.Format(PluginHandler.Instance.Translation.RequireAP, FakeSCPCommand.Cost);
 
                     if (FakeMTFCommand.ReqLvl > player.Level + 1)
-                        fakeMTF = $"<color=red>Require <color=yellow>{FakeMTFCommand.ReqLvl}</color> lvl</color>";
+                        fakeMTF = string.Format(PluginHandler.Instance.Translation.RequireLevel, FakeMTFCommand.ReqLvl);
                     else if (!FakeMTFCommand.IsReady)
-                        fakeMTF = $"<color=red>Require <color=yellow>{Math.Round(new TimeSpan(FakeMTFCommand.TimeLeft).TotalSeconds)}</color>s</color>";
+                        fakeMTF = string.Format(PluginHandler.Instance.Translation.RequireCooldown, Math.Round(new TimeSpan(FakeMTFCommand.TimeLeft).TotalSeconds));
                     else if (FakeMTFCommand.Cost > player.Energy)
-                        fakeMTF = $"<color=red>Require <color=yellow>{FakeMTFCommand.Cost}</color> AP</color>";
+                        fakeMTF = string.Format(PluginHandler.Instance.Translation.RequireAP, FakeMTFCommand.Cost);
 
                     if (FakeCICommand.ReqLvl > player.Level + 1)
-                        fakeCI = $"<color=red>Require <color=yellow>{FakeCICommand.ReqLvl}</color> lvl</color>";
+                        fakeCI = string.Format(PluginHandler.Instance.Translation.RequireLevel, FakeCICommand.ReqLvl);
                     else if (!FakeCICommand.IsReady)
-                        fakeCI = $"<color=red>Require <color=yellow>{Math.Round(new TimeSpan(FakeCICommand.TimeLeft).TotalSeconds)}</color>s</color>";
+                        fakeCI = string.Format(PluginHandler.Instance.Translation.RequireCooldown, Math.Round(new TimeSpan(FakeCICommand.TimeLeft).TotalSeconds));
                     else if (FakeCICommand.Cost > player.Energy)
-                        fakeCI = $"<color=red>Require <color=yellow>{FakeCICommand.Cost}</color> AP</color>";
+                        fakeCI = string.Format(PluginHandler.Instance.Translation.RequireAP, FakeCICommand.Cost);
 
                     if (FakeTeslaCommand.ReqLvl > player.Level + 1)
-                        fakeTesla = $"<color=red>Require <color=yellow>{FakeTeslaCommand.ReqLvl}</color> lvl</color>";
+                        fakeTesla = string.Format(PluginHandler.Instance.Translation.RequireLevel, FakeTeslaCommand.ReqLvl);
                     else if (!FakeTeslaCommand.IsReady)
-                        fakeTesla = $"<color=red>Require <color=yellow>{Math.Round(new TimeSpan(FakeTeslaCommand.TimeLeft).TotalSeconds)}</color>s</color>";
+                        fakeTesla = string.Format(PluginHandler.Instance.Translation.RequireCooldown, Math.Round(new TimeSpan(FakeTeslaCommand.TimeLeft).TotalSeconds));
                     else if (FakeTeslaCommand.Cost > player.Energy)
-                        fakeTesla = $"<color=red>Require <color=yellow>{FakeTeslaCommand.Cost}</color> AP</color>";
+                        fakeTesla = string.Format(PluginHandler.Instance.Translation.RequireAP, FakeTeslaCommand.Cost);
 
                     if (ScanCommand.ReqLvl > player.Level + 1)
-                        scan = $"<color=red>Require <color=yellow>{ScanCommand.ReqLvl}</color> lvl</color>";
+                        scan = string.Format(PluginHandler.Instance.Translation.RequireLevel, ScanCommand.ReqLvl);
                     else if (!ScanCommand.IsReady)
-                        scan = $"<color=red>Require <color=yellow>{Math.Round(new TimeSpan(ScanCommand.TimeLeft).TotalSeconds)}</color>s</color>";
+                        scan = string.Format(PluginHandler.Instance.Translation.RequireCooldown, Math.Round(new TimeSpan(ScanCommand.TimeLeft).TotalSeconds));
                     else if (ScanCommand.Cost > player.Energy)
-                        scan = $"<color=red>Require <color=yellow>{ScanCommand.Cost}</color> AP</color>";
+                        scan = string.Format(PluginHandler.Instance.Translation.RequireAP, ScanCommand.Cost);
 
                     if (FullScanCommand.ReqLvl > player.Level + 1)
-                        fullScan = $"<color=red>Require <color=yellow>{FullScanCommand.ReqLvl}</color> lvl</color>";
+                        fullScan = string.Format(PluginHandler.Instance.Translation.RequireLevel, FullScanCommand.ReqLvl);
                     else if (!FullScanCommand.IsReady)
-                        fullScan = $"<color=red>Require <color=yellow>{Math.Round(new TimeSpan(FullScanCommand.TimeLeft).TotalSeconds)}</color>s</color>";
+                        fullScan = string.Format(PluginHandler.Instance.Translation.RequireCooldown, Math.Round(new TimeSpan(FullScanCommand.TimeLeft).TotalSeconds));
                     else if (FullScanCommand.Cost > player.Energy)
-                        fullScan = $"<color=red>Require <color=yellow>{FullScanCommand.Cost}</color> AP</color>";
+                        fullScan = string.Format(PluginHandler.Instance.Translation.RequireAP, FullScanCommand.Cost);
 
                     if (BlackoutCommand.ReqLvl > player.Level + 1)
-                        blackout = $"<color=red>Require <color=yellow>{BlackoutCommand.ReqLvl}</color> lvl</color>";
+                        blackout = string.Format(PluginHandler.Instance.Translation.RequireLevel, BlackoutCommand.ReqLvl);
                     else if (!BlackoutCommand.IsReady)
-                        blackout = $"<color=red>Require <color=yellow>{Math.Round(new TimeSpan(BlackoutCommand.TimeLeft).TotalSeconds)}</color>s</color>";
+                        blackout = string.Format(PluginHandler.Instance.Translation.RequireCooldown, Math.Round(new TimeSpan(BlackoutCommand.TimeLeft).TotalSeconds));
                     else
-                        blackout = $"Max <color=yellow>{Math.Floor(player.Energy / BlackoutCommand.Cost)}</color> seconds of blackout";
+                        blackout = string.Format(PluginHandler.Instance.Translation.MaxBlackout, Math.Floor(player.Energy / BlackoutCommand.Cost));
 
                     if (StopWarheadCommand.ReqLvl > player.Level + 1)
-                        warheadStop = $"<color=red>Require <color=yellow>{StopWarheadCommand.ReqLvl}</color> lvl</color>";
+                        warheadStop = string.Format(PluginHandler.Instance.Translation.RequireLevel, StopWarheadCommand.ReqLvl);
                     else if (!StopWarheadCommand.IsReady)
-                        warheadStop = $"<color=red>Require <color=yellow>{Math.Round(new TimeSpan(StopWarheadCommand.TimeLeft).TotalSeconds)}</color>s</color>";
+                        warheadStop = string.Format(PluginHandler.Instance.Translation.RequireCooldown, Math.Round(new TimeSpan(StopWarheadCommand.TimeLeft).TotalSeconds));
                     else if (StopWarheadCommand.Cost > player.Energy)
-                        warheadStop = $"<color=red>Require <color=yellow>{StopWarheadCommand.Cost}</color> AP</color>";
+                        warheadStop = string.Format(PluginHandler.Instance.Translation.RequireAP, StopWarheadCommand.Cost);
                     else if (!Warhead.IsInProgress)
-                        warheadStop = "<color=red>Warhead is not detonating</color>";
+                        warheadStop = PluginHandler.Instance.Translation.WarheadDetonating;
 
                     if (CassieCommand.ReqLvl > player.Level + 1)
-                        cassie = $"<color=red>Require <color=yellow>{CassieCommand.ReqLvl}</color> lvl</color>";
+                        cassie = string.Format(PluginHandler.Instance.Translation.RequireLevel, CassieCommand.ReqLvl);
                     else if (!CassieCommand.IsReady)
-                        cassie = $"<color=red>Require <color=yellow>{Math.Round(new TimeSpan(CassieCommand.TimeLeft).TotalSeconds)}</color>s</color>";
+                        cassie = string.Format(PluginHandler.Instance.Translation.RequireCooldown, Math.Round(new TimeSpan(CassieCommand.TimeLeft).TotalSeconds));
                     else if (CassieCommand.Cost > player.Energy)
-                        cassie = $"<color=red>Require <color=yellow>{CassieCommand.Cost}</color> AP</color>";
+                        cassie = string.Format(PluginHandler.Instance.Translation.RequireAP, CassieCommand.Cost);
 
                     string sumMessage = $@"
 <size=50%>
