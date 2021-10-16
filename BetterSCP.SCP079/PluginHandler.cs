@@ -7,12 +7,11 @@
 using System;
 using Exiled.API.Enums;
 using Exiled.API.Features;
-using Exiled.API.Interfaces;
 
 namespace Mistaken.BetterSCP.SCP079
 {
     /// <inheritdoc/>
-    public class PluginHandler : Plugin<Config, Translation>
+    internal class PluginHandler : Plugin<Config, Translation>
     {
         /// <inheritdoc/>
         public override string Author => "Mistaken Devs";
@@ -21,13 +20,13 @@ namespace Mistaken.BetterSCP.SCP079
         public override string Name => "BetterSCP.SCP079";
 
         /// <inheritdoc/>
-        public override string Prefix => "MSCP";
+        public override string Prefix => "MSCP079";
 
         /// <inheritdoc/>
         public override PluginPriority Priority => PluginPriority.Default;
 
         /// <inheritdoc/>
-        public override Version RequiredExiledVersion => new Version(3, 0, 0, 84);
+        public override Version RequiredExiledVersion => new Version(3, 0, 3);
 
         /// <inheritdoc/>
         public override void OnEnabled()
