@@ -7,6 +7,7 @@
 using System;
 using Exiled.API.Enums;
 using Exiled.API.Features;
+using HarmonyLib;
 
 namespace Mistaken.BetterSCP.SCP079
 {
@@ -47,6 +48,10 @@ namespace Mistaken.BetterSCP.SCP079
         public override void OnEnabled()
         {
             Instance = this;
+
+            new Harmony("test").PatchAll();
+
+            Log.Error("ANTY MERGE SYSTEM");
 
             new SCP079Handler(this);
 
