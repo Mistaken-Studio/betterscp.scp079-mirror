@@ -53,6 +53,43 @@ namespace Mistaken.BetterSCP.SCP079
             Exiled.Events.Handlers.Server.RoundStarted -= this.Handle(() => this.Server_RoundStarted(), "RoundStart");
         }
 
+        internal static void HandleMapScan(Player player, bool value)
+        {
+            player.ReferenceHub.dissonanceUserSetup.MimicAs939 = false;
+
+            if (value)
+            {
+                PressingAltVCKey.Add(player);
+                MEC.Timing.RunCoroutine(HandleNewGUI(player));
+            }
+            else
+                PressingAltVCKey.Remove(player);
+        }
+
+        private static readonly HashSet<Player> PressingAltVCKey = new HashSet<Player>();
+
+        private static readonly float MapScan_CostPerStart = 30f;
+        private static readonly float MapScan_CostPerUpdate = 1.5f;
+
+        private static IEnumerator<float> HandleNewGUI(Player player)
+        {
+            if (player.Energy < MapScan_CostPerStart)
+                yield break;
+
+            player.Energy -= MapScan_CostPerStart;
+            while (PressingAltVCKey.Contains(player))
+            {
+                if (player.Energy < MapScan_CostPerUpdate)
+                    break;
+                player.Energy -= MapScan_CostPerUpdate;
+                player.ReferenceHub.scp079PlayerScript.TargetSetupIndicators(player.Connection, RealPlayers.List.Where(x => x.IsAlive).Select(x => x.Position).ToList());
+                yield return MEC.Timing.WaitForSeconds(.1f);
+            }
+
+            PressingAltVCKey.Remove(player);
+            player.ReferenceHub.scp079PlayerScript.TargetSetupIndicators(player.Connection, new List<Vector3>());
+        }
+
         private void Server_RoundStarted()
         {
             this.RunCoroutine(this.UpdateGeneratorsTimer(), "UpdateGeneratorsTimer");

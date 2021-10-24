@@ -13,16 +13,14 @@ using HarmonyLib;
 using MEC;
 using Mistaken.API;
 using NorthwoodLib.Pools;
+using UnityEngine;
 
 #pragma warning disable SA1118 // Parameter should not span multiple lines
 
 namespace Mistaken.BetterSCP.SCP079
 {
-    /// <summary>
-    /// Patch used to allow other scps to speak like SCP-939.
-    /// </summary>
     [HarmonyPatch(typeof(Radio), nameof(Radio.UserCode_CmdSyncTransmissionStatus))]
-    public static class SCPVoiceChatPatch
+    internal static class SCPVoiceChatPatch
     {
         private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
         {
@@ -60,8 +58,7 @@ namespace Mistaken.BetterSCP.SCP079
 
                     new CodeInstruction(OpCodes.Ldloc, player), // [Player]
                     new CodeInstruction(OpCodes.Ldarg_1, player), // [bool, Player]
-                    new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(SCPVoiceChatPatch), nameof(SCPVoiceChatPatch.DoStuff))), // []
-
+                    new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(SCP079Handler), nameof(SCP079Handler.HandleMapScan))), // []
                     new CodeInstruction(OpCodes.Nop).WithLabels(endLabel),
                 });
 
@@ -70,28 +67,6 @@ namespace Mistaken.BetterSCP.SCP079
 
             ListPool<CodeInstruction>.Shared.Return(newInstructions);
             yield break;
-        }
-
-        private static void DoStuff(Player player, bool value)
-        {
-            if (value)
-            {
-                players.Add(player);
-                Timing.RunCoroutine(Test(player));
-            }
-            else
-                players.Remove(player);
-        }
-
-        private static readonly HashSet<Player> players = new HashSet<Player>();
-
-        private static IEnumerator<float> Test(Player player)
-        {
-            while (players.Contains(player))
-            {
-                player.ReferenceHub.scp079PlayerScript.TargetSetupIndicators(player.Connection, RealPlayers.List.Where(x => x.IsAlive).Select(x => x.Position).ToList());
-                yield return Timing.WaitForSeconds(.5f);
-            }
         }
     }
 }
