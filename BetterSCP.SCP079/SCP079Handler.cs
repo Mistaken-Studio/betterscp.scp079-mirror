@@ -43,14 +43,14 @@ namespace Mistaken.BetterSCP.SCP079
         {
             SCPGUIHandler.SCPMessages[RoleType.Scp079] = PluginHandler.Instance.Translation.StartMessage;
 
-            Exiled.Events.Handlers.Server.RoundStarted += this.Handle(() => this.Server_RoundStarted(), "RoundStart");
+            Exiled.Events.Handlers.Server.RoundStarted += this.Server_RoundStarted;
         }
 
         public override void OnDisable()
         {
             SCPGUIHandler.SCPMessages.Remove(RoleType.Scp079);
 
-            Exiled.Events.Handlers.Server.RoundStarted -= this.Handle(() => this.Server_RoundStarted(), "RoundStart");
+            Exiled.Events.Handlers.Server.RoundStarted -= this.Server_RoundStarted;
         }
 
         internal static void HandleMapScan(Player player, bool value)
@@ -129,7 +129,7 @@ namespace Mistaken.BetterSCP.SCP079
 
                     if (nearestGenerator != null)
                         msg = string.Format(PluginHandler.Instance.Translation.GeneratorTime, generators, nearestGenerator.Network_syncTime.ToString("00"), string.Join("<br>", gens.Select(i => Map.FindParentRoom(i.gameObject)?.Type.ToString() ?? "[UNKNOWN]")));
-                    else if (Events.Handlers.CustomEvents.SCP079.IsBeingRecontained)
+                    else if (MapPlus.IsSCP079ReadyForRecontainment)
                         msg = PluginHandler.Instance.Translation.RecontainmentReady;
                 }
 
