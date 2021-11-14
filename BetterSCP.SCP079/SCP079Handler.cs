@@ -96,7 +96,7 @@ namespace Mistaken.BetterSCP.SCP079
             }
 
             PressingAltVCKey.Remove(player);
-            for (int i = 0; i < MapScan_DisableDelay * MapScan_UpdateRate; i++)
+            for (int i = 0; i < MapScan_DisableDelay / MapScan_UpdateRate; i++)
             {
                 player.ReferenceHub.scp079PlayerScript.TargetSetupIndicators(player.Connection, lastData);
                 yield return MEC.Timing.WaitForSeconds(MapScan_UpdateRate);
