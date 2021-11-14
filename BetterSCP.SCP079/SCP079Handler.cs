@@ -95,6 +95,8 @@ namespace Mistaken.BetterSCP.SCP079
                 player.ReferenceHub.scp079PlayerScript.TargetSetupIndicators(player.Connection, lastData);
                 yield return MEC.Timing.WaitForSeconds(.1f);
             }
+
+            player.ReferenceHub.scp079PlayerScript.TargetSetupIndicators(player.Connection, new List<Vector3>());
         }
 
         private void Server_RoundStarted()
