@@ -55,6 +55,9 @@ namespace Mistaken.BetterSCP.SCP079.Commands
                             message = message.Replace("xmas_", string.Empty);
                         while (message.Contains("bell_"))
                             message = message.Replace("bell_", string.Empty);
+
+                        Events.EventHandler.OnUseCassie(new Events.SCP079UseCassieEventArgs(player, message));
+
                         Cassie.Message("PITCH_0.9 SCP 0 PITCH_0.9 7 PITCH_0.9 9 PITCH_0.9 jam_050_5 OVERRIDE PITCH_1 . . . " + message);
                         SCP079Handler.GainXP(player, Cost);
                         lastUse = DateTime.Now;

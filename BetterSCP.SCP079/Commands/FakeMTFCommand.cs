@@ -41,8 +41,30 @@ namespace Mistaken.BetterSCP.SCP079.Commands
                 {
                     if (IsReady)
                     {
-                        int number = UnityEngine.Random.Range(0, 20);
-                        char letter = this.RandomChar();
+                        Events.EventHandler.OnUseFakeMTF(new Events.SCP079UseFakeMTFEventArgs(player));
+
+                        Respawning.NamingRules.UnitNamingRules.TryGetNamingRule(Respawning.SpawnableTeamType.NineTailedFox, out var ntfRule);
+                        ntfRule.GenerateNew(Respawning.SpawnableTeamType.NineTailedFox, out string unitName);
+                        string number = unitName.Split('-')[1];
+                        char letter = unitName[0];
+
+                        if (lastFakeUnitIndex != -1)
+                        {
+                            Respawning.NamingRules.UnitNamingRule.UsedCombinations.Remove(lastFakeUnit);
+                            Respawning.RespawnManager.Singleton.NamingManager.AllUnitNames.RemoveAt(lastFakeUnitIndex);
+                        }
+
+                        lastFakeUnit = unitName;
+                        lastFakeUnitIndex = Respawning.RespawnManager.Singleton.NamingManager.AllUnitNames.Count - 1;
+                        string tmp = Respawning.RespawnManager.Singleton.NamingManager.AllUnitNames[Respawning.RespawnManager.Singleton.NamingManager.AllUnitNames.Count - 2].UnitName;
+                        int colorIndex = tmp.IndexOf("<color=");
+                        if (colorIndex != -1)
+                        {
+                            string color = tmp.Substring(colorIndex + 8, tmp.IndexOf('>', colorIndex));
+                            Log.Debug(color, PluginHandler.Instance.Config.VerbouseOutput);
+                            Map.ChangeUnitColor(lastFakeUnitIndex, color);
+                        }
+
                         int scps = RealPlayers.List.Where(p => p.Team == Team.SCP && p.Role != RoleType.Scp0492).Count();
                         Cassie.Message($"MTFUNIT EPSILON 11 DESIGNATED NATO_{letter} {number} HASENTERED ALLREMAINING AWAITINGRECONTAINMENT {scps} SCPSUBJECT{(scps == 1 ? string.Empty : "S")}");
                         SCP079Handler.GainXP(player, Cost);
@@ -74,16 +96,12 @@ namespace Mistaken.BetterSCP.SCP079.Commands
         internal static long TimeLeft => lastUse.AddSeconds(Cooldown).Ticks - DateTime.Now.Ticks;
 
         private static DateTime lastUse = default(DateTime);
+        private static string lastFakeUnit = null;
+        private static int lastFakeUnitIndex = -1;
 
         private string GetUsage()
         {
             return ".fakemtf";
-        }
-
-        private char RandomChar()
-        {
-            string alpha = "ABCDEFGHIJKLMNOPQRSTWYXZ";
-            return alpha[UnityEngine.Random.Range(0, alpha.Length)];
         }
     }
 }
