@@ -18,6 +18,21 @@ namespace Mistaken.BetterSCP.SCP079.Commands
     [CommandSystem.CommandHandler(typeof(CommandSystem.ClientCommandHandler))]
     public class FakeSCPCommand : IBetterCommand
     {
+        /// <summary>
+        /// Cause of death used for fake SCP.
+        /// </summary>
+        public enum FakeSCPDeathCause
+        {
+#pragma warning disable CS1591 // Brak komentarza XML dla widocznego publicznie typu lub składowej
+            TESLA = 1,
+            CHAOS,
+            CLASSD,
+            UNKNOWN,
+            RECONTAINMENT,
+            DECONTAMINATION,
+#pragma warning restore CS1591 // Brak komentarza XML dla widocznego publicznie typu lub składowej
+        }
+
         /// <inheritdoc/>
         public override string Command => "fakescp";
 
@@ -40,7 +55,7 @@ namespace Mistaken.BetterSCP.SCP079.Commands
                 {
                     if (IsReady)
                     {
-                        if (args.Length == 0 || !int.TryParse(args[0], out int reason) || reason < 1 || reason > 6)
+                        if (args.Length == 0 || !int.TryParse(args[0], out int rawReason) || rawReason < 1 || rawReason > 6)
                         {
                             return new string[]
                             {
@@ -54,6 +69,8 @@ namespace Mistaken.BetterSCP.SCP079.Commands
                                 "6. Śmierć w Dekontaminacji LCZ",
                             };
                         }
+
+                        FakeSCPDeathCause reason = (FakeSCPDeathCause)rawReason;
 
                         args = args.Skip(1).ToArray();
                         if (args.Length == 0)
@@ -88,24 +105,26 @@ namespace Mistaken.BetterSCP.SCP079.Commands
                                 }
                             }
 
+                            Events.EventHandler.OnUseFakeSCP(new Events.SCP079UseFakeSCPEventArgs(player, processedtonumber, reason));
+
                             switch (reason)
                             {
-                                case 1:
+                                case FakeSCPDeathCause.TESLA:
                                     Cassie.Message("SCP " + processedtonumber + " SUCCESSFULLY TERMINATED BY AUTOMATIC SECURITY SYSTEM");
                                     break;
-                                case 2:
+                                case FakeSCPDeathCause.CHAOS:
                                     Cassie.Message("SCP " + processedtonumber + " SUCCESSFULLY TERMINATED BY CHAOSINSURGENCY");
                                     break;
-                                case 3:
+                                case FakeSCPDeathCause.CLASSD:
                                     Cassie.Message("SCP " + processedtonumber + " CONTAINEDSUCCESSFULLY BY CLASSD PERSONNEL");
                                     break;
-                                case 4:
+                                case FakeSCPDeathCause.UNKNOWN:
                                     Cassie.Message("SCP " + processedtonumber + " SUCCESSFULLY TERMINATED . TERMINATION CAUSE UNSPECIFIED");
                                     break;
-                                case 5:
+                                case FakeSCPDeathCause.RECONTAINMENT:
                                     Cassie.Message("SCP 1 0 6 RECONTAINED SUCCESSFULLY");
                                     break;
-                                case 6:
+                                case FakeSCPDeathCause.DECONTAMINATION:
                                     Cassie.Message("SCP " + processedtonumber + " LOST IN DECONTAMINATION SEQUENCE");
                                     break;
                             }

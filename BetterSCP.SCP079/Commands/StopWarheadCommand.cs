@@ -44,6 +44,7 @@ namespace Mistaken.BetterSCP.SCP079.Commands
                 {
                     if (IsReady)
                     {
+                        Events.EventHandler.OnUseWarheadStop(new Events.SCP079UseStopEventArgs(player));
                         Warhead.Stop();
                         Warhead.LeverStatus = false;
                         Cassie.Message("PITCH_0.8 You jam_070_3 will jam_050_5 .g5 no jam_040_9 detonate me", false, false);

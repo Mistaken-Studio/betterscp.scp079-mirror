@@ -64,6 +64,8 @@ namespace Mistaken.BetterSCP.SCP079.Commands
                                 hcz++;
                         }
 
+                        Events.EventHandler.OnUseScan(new Events.SCP079UseScanEventArgs(player, false));
+
                         string message = PluginHandler.Instance.Translation.Scan;
                         message = message
                             .Replace("{ez}", ez.ToString())
