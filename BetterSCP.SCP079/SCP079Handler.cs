@@ -58,10 +58,7 @@ namespace Mistaken.BetterSCP.SCP079
             player.ReferenceHub.dissonanceUserSetup.MimicAs939 = false;
 
             if (value)
-            {
-                PressingAltVCKey.Add(player);
                 MEC.Timing.RunCoroutine(HandleNewGUI(player));
-            }
             else
                 PressingAltVCKey.Remove(player);
         }
@@ -70,24 +67,34 @@ namespace Mistaken.BetterSCP.SCP079
 
         private static readonly float MapScan_CostPerStart = 30f;
         private static readonly float MapScan_CostPerUpdate = 1.5f;
+        private static readonly float MapScan_RequiedLvl = 2;
 
         private static IEnumerator<float> HandleNewGUI(Player player)
         {
-            if (player.Energy < MapScan_CostPerStart)
+            if (player.Level < MapScan_RequiedLvl)
                 yield break;
 
+            if (player.Energy < MapScan_CostPerStart)
+                yield break;
+            PressingAltVCKey.Add(player);
             player.Energy -= MapScan_CostPerStart;
+            List<Vector3> lastData = new List<Vector3>();
             while (PressingAltVCKey.Contains(player))
             {
                 if (player.Energy < MapScan_CostPerUpdate)
                     break;
                 player.Energy -= MapScan_CostPerUpdate;
-                player.ReferenceHub.scp079PlayerScript.TargetSetupIndicators(player.Connection, RealPlayers.List.Where(x => x.IsAlive).Select(x => x.Position).ToList());
+                lastData = RealPlayers.List.Where(x => x.IsAlive).Select(x => x.Position).ToList();
+                player.ReferenceHub.scp079PlayerScript.TargetSetupIndicators(player.Connection, lastData);
                 yield return MEC.Timing.WaitForSeconds(.1f);
             }
 
             PressingAltVCKey.Remove(player);
-            player.ReferenceHub.scp079PlayerScript.TargetSetupIndicators(player.Connection, new List<Vector3>());
+            for (int i = 0; i < 20; i++)
+            {
+                player.ReferenceHub.scp079PlayerScript.TargetSetupIndicators(player.Connection, lastData);
+                yield return MEC.Timing.WaitForSeconds(.1f);
+            }
         }
 
         private void Server_RoundStarted()
