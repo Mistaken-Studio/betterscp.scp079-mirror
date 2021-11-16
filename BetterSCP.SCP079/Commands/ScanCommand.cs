@@ -5,6 +5,7 @@
 // -----------------------------------------------------------------------
 
 using System;
+using System.Linq;
 using CommandSystem;
 using Mistaken.API;
 using Mistaken.API.Commands;
@@ -46,7 +47,7 @@ namespace Mistaken.BetterSCP.SCP079.Commands
                         int scp049 = 0;
                         int pocket = 0;
                         int surface = 0;
-                        foreach (var item in RealPlayers.List)
+                        foreach (var item in RealPlayers.List.Where(x => x.IsAlive))
                         {
                             if (item.IsInPocketDimension)
                                 pocket++;
