@@ -10,6 +10,7 @@ using CommandSystem;
 using Exiled.API.Features;
 using Mistaken.API;
 using Mistaken.API.Commands;
+using Mistaken.API.Diagnostics;
 using Mistaken.API.Extensions;
 using Mistaken.RoundLogger;
 
@@ -60,9 +61,11 @@ namespace Mistaken.BetterSCP.SCP079.Commands
                         int colorIndex = tmp.IndexOf("<color=");
                         if (colorIndex != -1)
                         {
-                            string color = tmp.Substring(colorIndex + 8, tmp.IndexOf('>', colorIndex));
+                            string color = tmp.Substring(colorIndex + 7, tmp.IndexOf('>', colorIndex) - (colorIndex + 7));
                             Log.Debug(color, PluginHandler.Instance.Config.VerbouseOutput);
                             Map.ChangeUnitColor(lastFakeUnitIndex, color);
+
+                            Module.CallSafeDelayed(2, () => SCPGUIHandler.ResyncAllUnits(), "FAKEMTF.ResyncAllUnits");
                         }
 
                         int scps = RealPlayers.List.Where(p => p.Team == Team.SCP && p.Role != RoleType.Scp0492).Count();
