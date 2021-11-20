@@ -13,12 +13,12 @@ namespace Mistaken.BetterSCP.SCP079.Events
     public class SCP079UseFakeSCPEventArgs : SCP079UseEventArgs
     {
         /// <summary>
-        /// SCP Number.
+        /// Gets sCP Number.
         /// </summary>
         public string SCP { get; }
 
         /// <summary>
-        /// Cause of death.
+        /// Gets cause of death.
         /// </summary>
         public FakeSCPDeathCause Cause { get; }
 

@@ -12,12 +12,12 @@ namespace Mistaken.BetterSCP.SCP079.Events
 {
     public class SCP079UseScanEventArgs : SCP079UseEventArgs
     {
+        public bool IsFullScan { get; }
+
         internal SCP079UseScanEventArgs(Player scp079, bool isFullScan, bool isAllowed = true)
             : base(scp079, isAllowed)
         {
             this.IsFullScan = isFullScan;
         }
-
-        public bool IsFullScan { get; }
     }
 }

@@ -1,5 +1,5 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="SCP079UseStopWarheadEventArgs.cs" company="Mistaken">
+// <copyright file="SCP079UseStopEventArgs.cs" company="Mistaken">
 // Copyright (c) Mistaken. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
