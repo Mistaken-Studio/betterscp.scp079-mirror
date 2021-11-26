@@ -5,6 +5,7 @@
 // -----------------------------------------------------------------------
 
 using System;
+using System.Linq;
 using CommandSystem;
 using Exiled.API.Features;
 using Mistaken.API;
@@ -48,7 +49,7 @@ namespace Mistaken.BetterSCP.SCP079.Commands
                         int pocket = 0;
                         int surface = 0;
 
-                        foreach (var item in RealPlayers.List)
+                        foreach (var item in RealPlayers.List.Where(x => x.IsAlive))
                         {
                             if (item.IsInPocketDimension)
                                 pocket++;
@@ -81,6 +82,9 @@ namespace Mistaken.BetterSCP.SCP079.Commands
                             message += string.Format(" . {0} SCP 0 4 9 containment chamber", scp049);
                         if (pocket != 0)
                             message += string.Format(" . {0} Unknown", pocket);
+
+                        Events.EventHandler.OnUseScan(new Events.SCP079UseScanEventArgs(player, true));
+
                         if (message != "Full facility scan initiated")
                             Cassie.Message(message);
                         else

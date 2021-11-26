@@ -29,7 +29,7 @@ namespace Mistaken.BetterSCP.SCP079
 
         public int RequiedLvlScan { get; set; } = 2;
 
-        public int ApCostScan { get; set; } = 100;
+        public int ApCostScan { get; set; } = 30;
 
         public int CooldownScan { get; set; } = 60;
 

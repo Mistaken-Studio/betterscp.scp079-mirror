@@ -50,6 +50,8 @@ namespace Mistaken.BetterSCP.SCP079.Commands
 
                             if (player.Energy >= toDrain)
                             {
+                                Events.EventHandler.OnUseBlackout(new Events.SCP079UseBlackoutEventArgs(player, toDrain));
+
                                 Map.TurnOffAllLights(duration);
 
                                 SCP079Handler.GainXP(player, toDrain);

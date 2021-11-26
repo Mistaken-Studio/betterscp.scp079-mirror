@@ -39,6 +39,8 @@ namespace Mistaken.BetterSCP.SCP079.Commands
                 {
                     if (IsReady)
                     {
+                        Events.EventHandler.OnUseFakeTesla(new Events.SCP079UseFakeTeslaEventArgs(player));
+
                         Cassie.Message("Tesla gates deactivated by order of NINETAILEDFOX COMMANDER");
                         SCP079Handler.GainXP(player, Cost);
                         lastUse = DateTime.Now;

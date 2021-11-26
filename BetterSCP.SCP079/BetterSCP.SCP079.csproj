@@ -45,6 +45,7 @@
     <Reference Include="Mistaken.RoundLogger" HintPath="$(MISTAKEN_REFERENCES)\Mistaken.RoundLogger.dll" />
     <Reference Include="Mistaken.Events" HintPath="$(MISTAKEN_REFERENCES)\Mistaken.Events.dll" />
     <Reference Include="Mistaken.BetterSCP" HintPath="$(MISTAKEN_REFERENCES)\Mistaken.BetterSCP.dll" />
+    <Reference Include="Mistaken.BetterRP" HintPath="$(MISTAKEN_REFERENCES)\Mistaken.BetterRP.dll" />
     <Reference Include="UnityEngine.CoreModule" HintPath="$(MISTAKEN_REFERENCES)\UnityEngine.CoreModule.dll" />
     <Reference Include="UnityEngine.PhysicsModule" HintPath="$(MISTAKEN_REFERENCES)\UnityEngine.PhysicsModule.dll" />
     <Reference Include="Mirror" HintPath="$(MISTAKEN_REFERENCES)\Mirror.dll" />
@@ -68,6 +69,16 @@
     <Compile Include="Commands\FullScanCommand.cs" />
     <Compile Include="Commands\ScanCommand.cs" />
     <Compile Include="Commands\StopWarheadCommand.cs" />
+    <Compile Include="Events\EventHandler.cs" />
+    <Compile Include="Events\SCP079UseBlackoutEventArgs.cs" />
+    <Compile Include="Events\SCP079UseCassieEventArgs.cs" />
+    <Compile Include="Events\SCP079UseEventArgs.cs" />
+    <Compile Include="Events\SCP079UseFakeCIEventArgs.cs" />
+    <Compile Include="Events\SCP079UseFakeMTFEventArgs.cs" />
+    <Compile Include="Events\SCP079UseFakeSCPEventArgs.cs" />
+    <Compile Include="Events\SCP079UseFakeTeslaEventArgs.cs" />
+    <Compile Include="Events\SCP079UseScanEventArgs.cs" />
+    <Compile Include="Events\SCP079UseStopEventArgs.cs" />
     <Compile Include="PluginHandler.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

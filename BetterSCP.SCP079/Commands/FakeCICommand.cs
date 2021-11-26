@@ -29,9 +29,32 @@ namespace Mistaken.BetterSCP.SCP079.Commands
         /// <inheritdoc/>
         public override string[] Execute(ICommandSender sender, string[] args, out bool success)
         {
+            try
+            {
+                return this.ExecuteInternal(sender, args, out success);
+            }
+            catch (Exception ex)
+            {
+                success = false;
+                Log.Debug(ex);
+                return new string[] { "Command Disabled" };
+            }
+        }
+
+        internal static float Cooldown => PluginHandler.Instance.Config.Cooldown;
+
+        internal static float Cost => PluginHandler.Instance.Config.ApCost;
+
+        internal static float ReqLvl => PluginHandler.Instance.Config.RequiedLvl;
+
+        internal static bool IsReady => lastUse.AddSeconds(Cooldown).Ticks <= DateTime.Now.Ticks;
+
+        internal static long TimeLeft => lastUse.AddSeconds(Cooldown).Ticks - DateTime.Now.Ticks;
+
+        internal string[] ExecuteInternal(ICommandSender sender, string[] args, out bool success)
+        {
             success = false;
-            return new string[] { "Command Disabled" };
-            /*var player = sender.GetPlayer();
+            var player = sender.GetPlayer();
             if (player.Role != RoleType.Scp079)
                 return new string[] { "Only SCP 079" };
             if (player.Level >= ReqLvl - 1)
@@ -40,10 +63,11 @@ namespace Mistaken.BetterSCP.SCP079.Commands
                 {
                     if (IsReady)
                     {
-                        Cassie.Message(BetterRP.Handler.CIAnnouncments[UnityEngine.Random.Range(0, BetterRP.Handler.CIAnnouncments.Length)]);
+                        Events.EventHandler.OnUseFakeCI(new Events.SCP079UseFakeCIEventArgs(player));
+
+                        Cassie.Message(BetterRP.BetterRPHandler.CIAnnouncments[UnityEngine.Random.Range(0, BetterRP.BetterRPHandler.CIAnnouncments.Length)]);
                         SCP079Handler.GainXP(player, Cost);
-                        Lastuse = DateTime.Now;
-                        //CustomAchievements.RoundEventHandler.AddProggress("Manipulator", player);
+                        lastUse = DateTime.Now;
 
                         RLogger.Log("SCP079 EVENT", "FAKECI", $"{player.PlayerToString()} requested fakeci");
 
@@ -57,18 +81,8 @@ namespace Mistaken.BetterSCP.SCP079.Commands
                     return new string[] { PluginHandler.Instance.Translation.FailedAP.Replace("${ap}", Cost.ToString()) };
             }
             else
-                return new string[] { PluginHandler.Instance.Translation.FailedLvl.Replace("${lvl}", ReqLvl.ToString()) };*/
+                return new string[] { PluginHandler.Instance.Translation.FailedLvl.Replace("${lvl}", ReqLvl.ToString()) };
         }
-
-        internal static float Cooldown => PluginHandler.Instance.Config.Cooldown;
-
-        internal static float Cost => PluginHandler.Instance.Config.ApCost;
-
-        internal static float ReqLvl => PluginHandler.Instance.Config.RequiedLvl;
-
-        internal static bool IsReady => lastUse.AddSeconds(Cooldown).Ticks <= DateTime.Now.Ticks;
-
-        internal static long TimeLeft => lastUse.AddSeconds(Cooldown).Ticks - DateTime.Now.Ticks;
 
         private static DateTime lastUse = default(DateTime);
 
