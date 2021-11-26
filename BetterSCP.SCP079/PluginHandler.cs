@@ -1,4 +1,4 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // <copyright file="PluginHandler.cs" company="Mistaken">
 // Copyright (c) Mistaken. All rights reserved.
 // </copyright>
@@ -49,9 +49,7 @@ namespace Mistaken.BetterSCP.SCP079
         {
             Instance = this;
 
-            new Harmony("test").PatchAll();
-
-            Log.Error("ANTY MERGE SYSTEM");
+            new Harmony("mistaken.betterscp.scp079").PatchAll();
 
             new SCP079Handler(this);
 
