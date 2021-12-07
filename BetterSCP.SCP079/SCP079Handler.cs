@@ -1,4 +1,4 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // <copyright file="SCP079Handler.cs" company="Mistaken">
 // Copyright (c) Mistaken. All rights reserved.
 // </copyright>
@@ -51,6 +51,58 @@ namespace Mistaken.BetterSCP.SCP079
             SCPGUIHandler.SCPMessages.Remove(RoleType.Scp079);
 
             Exiled.Events.Handlers.Server.RoundStarted -= this.Server_RoundStarted;
+        }
+
+        internal static void HandleMapScan(Player player, bool value)
+        {
+            player.ReferenceHub.dissonanceUserSetup.MimicAs939 = false;
+
+            if (value)
+                MEC.Timing.RunCoroutine(HandleNewGUI(player));
+            else
+                PressingAltVCKey.Remove(player);
+        }
+
+        private static readonly HashSet<Player> PressingAltVCKey = new HashSet<Player>();
+
+        private static float MapScan_CostPerStart => PluginHandler.Instance.Config.ApStartCostAdvancedScan;
+
+        private static float MapScan_CostPerUpdate => PluginHandler.Instance.Config.ApCostAdvancedScan;
+
+        private static float MapScan_RequiedLvl => PluginHandler.Instance.Config.RequiedLvlAdvancedScan;
+
+        private static float MapScan_DisableDelay => PluginHandler.Instance.Config.AdvancedScanDisableDelay;
+
+        private static float MapScan_UpdateRate => PluginHandler.Instance.Config.AdvancedScanUpdateRate;
+
+        private static IEnumerator<float> HandleNewGUI(Player player)
+        {
+            if (player.Level < MapScan_RequiedLvl)
+                yield break;
+
+            if (player.Energy < MapScan_CostPerStart)
+                yield break;
+            PressingAltVCKey.Add(player);
+            player.Energy -= MapScan_CostPerStart;
+            List<Vector3> lastData = new List<Vector3>();
+            while (PressingAltVCKey.Contains(player))
+            {
+                if (player.Energy < MapScan_CostPerUpdate)
+                    break;
+                player.Energy -= MapScan_CostPerUpdate;
+                lastData = RealPlayers.List.Where(x => x.IsAlive).Select(x => x.Position).ToList();
+                player.ReferenceHub.scp079PlayerScript.TargetSetupIndicators(player.Connection, lastData);
+                yield return MEC.Timing.WaitForSeconds(MapScan_UpdateRate);
+            }
+
+            PressingAltVCKey.Remove(player);
+            for (int i = 0; i < MapScan_DisableDelay / MapScan_UpdateRate; i++)
+            {
+                player.ReferenceHub.scp079PlayerScript.TargetSetupIndicators(player.Connection, lastData);
+                yield return MEC.Timing.WaitForSeconds(MapScan_UpdateRate);
+            }
+
+            player.ReferenceHub.scp079PlayerScript.TargetSetupIndicators(player.Connection, new List<Vector3>());
         }
 
         private void Server_RoundStarted()
@@ -113,6 +165,7 @@ namespace Mistaken.BetterSCP.SCP079
                     string blackout = PluginHandler.Instance.Translation.Ready;
                     string warheadStop = PluginHandler.Instance.Translation.Ready;
                     string cassie = PluginHandler.Instance.Translation.Ready;
+                    string advancedScan = PluginHandler.Instance.Translation.Ready;
 
                     if (FakeSCPCommand.ReqLvl > player.Level + 1)
                         fakeSCP = string.Format(PluginHandler.Instance.Translation.RequireLevel, FakeSCPCommand.ReqLvl);
@@ -179,7 +232,12 @@ namespace Mistaken.BetterSCP.SCP079
                     else if (CassieCommand.Cost > player.Energy)
                         cassie = string.Format(PluginHandler.Instance.Translation.RequireAP, CassieCommand.Cost);
 
-                    string sumMessage = $@"
+                    if (MapScan_RequiedLvl > player.Level + 1)
+                        advancedScan = string.Format(PluginHandler.Instance.Translation.RequireLevel, MapScan_RequiedLvl);
+                    else if (MapScan_CostPerStart > player.Energy)
+                        advancedScan = string.Format(PluginHandler.Instance.Translation.RequireAP, MapScan_CostPerStart);
+
+                    string sumMessage = $@"<br><br><br><br><br>
 <size=50%>
 <align=left>Fake SCP</align><line-height=1px><br></line-height><align=right>{fakeSCP}</align>
 <align=left>Fake MTF</align><line-height=1px><br></line-height><align=right>{fakeMTF}</align>
@@ -190,6 +248,7 @@ namespace Mistaken.BetterSCP.SCP079
 <align=left>Blackout</align><line-height=1px><br></line-height><align=right>{blackout}</align>
 <align=left>Warhead Stop</align><line-height=1px><br></line-height><align=right>{warheadStop}</align>
 <align=left>Cassie</align><line-height=1px><br></line-height><align=right>{cassie}</align>
+<align=left>Advanced Scan</align><line-height=1px><br></line-height><align=right>{advancedScan}</align>
 </size>";
                     player.SetGUI("scp079", PseudoGUIPosition.MIDDLE, sumMessage);
                     player.SetGUI("scp079_message", PseudoGUIPosition.BOTTOM, msg);

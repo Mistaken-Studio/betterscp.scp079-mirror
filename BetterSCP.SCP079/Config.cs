@@ -51,6 +51,16 @@ namespace Mistaken.BetterSCP.SCP079
 
         public int CooldownCassie { get; set; } = 300;
 
+        public int RequiedLvlAdvancedScan { get; set; } = 2;
+
+        public float ApStartCostAdvancedScan { get; set; } = 30f;
+
+        public float ApCostAdvancedScan { get; set; } = 1.5f;
+
+        public float AdvancedScanDisableDelay { get; set; } = 2;
+
+        public float AdvancedScanUpdateRate { get; set; } = 0.1f;
+
         /// <inheritdoc/>
         [Description("Auto Update Settings")]
         public System.Collections.Generic.Dictionary<string, string> AutoUpdateConfig { get; set; } = new System.Collections.Generic.Dictionary<string, string>

@@ -1,4 +1,4 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // <copyright file="PluginHandler.cs" company="Mistaken">
 // Copyright (c) Mistaken. All rights reserved.
 // </copyright>
@@ -7,6 +7,7 @@
 using System;
 using Exiled.API.Enums;
 using Exiled.API.Features;
+using HarmonyLib;
 
 namespace Mistaken.BetterSCP.SCP079
 {
@@ -47,6 +48,8 @@ namespace Mistaken.BetterSCP.SCP079
         public override void OnEnabled()
         {
             Instance = this;
+
+            new Harmony("mistaken.betterscp.scp079").PatchAll();
 
             new SCP079Handler(this);
 
