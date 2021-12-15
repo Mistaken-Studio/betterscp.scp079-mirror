@@ -41,12 +41,12 @@ namespace Mistaken.BetterSCP.SCP079
                 new CodeInstruction[]
                 {
                     new CodeInstruction(OpCodes.Ldarg_0),
-                    new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(GlassPatch), nameof(GlassPatch.window))),
+                    new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(GlassPatch), nameof(GlassPatch.window))),
                     new CodeInstruction(OpCodes.Beq_S, label),
                     new CodeInstruction(OpCodes.Br_S, continueLabel),
                     new CodeInstruction(OpCodes.Nop).WithLabels(label),
 
-                    new CodeInstruction(OpCodes.Callvirt, AccessTools.PropertyGetter(typeof(Map), nameof(Map.ActivatedGenerators))),
+                    new CodeInstruction(OpCodes.Call, AccessTools.PropertyGetter(typeof(Map), nameof(Map.ActivatedGenerators))),
                     new CodeInstruction(OpCodes.Ldc_I4_3),
                     new CodeInstruction(OpCodes.Beq_S, continueLabel),
                     new CodeInstruction(OpCodes.Ret),
