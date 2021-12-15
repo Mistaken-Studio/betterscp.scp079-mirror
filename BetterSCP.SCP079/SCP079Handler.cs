@@ -107,6 +107,7 @@ namespace Mistaken.BetterSCP.SCP079
 
         private void Server_RoundStarted()
         {
+            GlassPatch.Reload();
             this.RunCoroutine(this.UpdateGeneratorsTimer(), "UpdateGeneratorsTimer");
         }
 
