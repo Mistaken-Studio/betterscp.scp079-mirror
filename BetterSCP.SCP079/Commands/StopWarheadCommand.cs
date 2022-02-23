@@ -51,7 +51,7 @@ namespace Mistaken.BetterSCP.SCP079.Commands
             Events.EventHandler.OnUseWarheadStop(new Events.SCP079UseStopEventArgs(player));
             Warhead.Stop();
             Warhead.LeverStatus = false;
-            Cassie.Message("PITCH_0.8 You jam_070_3 will jam_050_5 .g5 no jam_040_9 detonate me", false, false);
+            Respawning.RespawnEffectsController.PlayCassieAnnouncement("PITCH_0.8 You jam_070_3 will jam_050_5 .g5 no jam_040_9 detonate me", false, false, true);
             SCP079Handler.GainXP(player, Cost);
             lastUse = DateTime.Now;
 

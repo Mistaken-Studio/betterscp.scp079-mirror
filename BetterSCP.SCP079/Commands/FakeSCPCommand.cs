@@ -5,12 +5,14 @@
 // -----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using CommandSystem;
 using Exiled.API.Features;
 using Mistaken.API.Commands;
 using Mistaken.API.Extensions;
 using Mistaken.RoundLogger;
+using Utils.Networking;
 
 namespace Mistaken.BetterSCP.SCP079.Commands
 {
@@ -114,30 +116,41 @@ namespace Mistaken.BetterSCP.SCP079.Commands
 
                 Events.EventHandler.OnUseFakeSCP(new Events.SCP079UseFakeSCPEventArgs(player, processedtonumber, reason));
 
+                List<Subtitles.SubtitlePart> subtitles = new List<Subtitles.SubtitlePart>(1);
+                if (reason == FakeSCPDeathCause.RECONTAINMENT)
+                    processedtonumber = "1 0 6";
+                subtitles.Add(new Subtitles.SubtitlePart(Subtitles.SubtitleType.SCP, new string[] { "SCP-" + processedtonumber.Replace(" ", string.Empty) }));
                 switch (reason)
                 {
                     case FakeSCPDeathCause.TESLA:
                         Cassie.Message("SCP " + processedtonumber + " SUCCESSFULLY TERMINATED BY AUTOMATIC SECURITY SYSTEM");
+                        subtitles.Add(new Subtitles.SubtitlePart(Subtitles.SubtitleType.TerminatedBySecuritySystem, new string[0]));
                         break;
                     case FakeSCPDeathCause.CHAOS:
                         Cassie.Message("SCP " + processedtonumber + " SUCCESSFULLY TERMINATED BY CHAOSINSURGENCY");
+                        subtitles.Add(new Subtitles.SubtitlePart(Subtitles.SubtitleType.ContainedByChaos, new string[0]));
                         break;
                     case FakeSCPDeathCause.CLASSD:
                         Cassie.Message("SCP " + processedtonumber + " CONTAINEDSUCCESSFULLY BY CLASSD PERSONNEL");
+                        subtitles.Add(new Subtitles.SubtitlePart(Subtitles.SubtitleType.ContainedByClassD, new string[0]));
                         break;
                     case FakeSCPDeathCause.UNKNOWN:
                         Cassie.Message("SCP " + processedtonumber + " SUCCESSFULLY TERMINATED . TERMINATION CAUSE UNSPECIFIED");
+                        subtitles.Add(new Subtitles.SubtitlePart(Subtitles.SubtitleType.TerminationCauseUnspecified, new string[0]));
                         break;
                     case FakeSCPDeathCause.RECONTAINMENT:
                         Cassie.Message("SCP 1 0 6 RECONTAINED SUCCESSFULLY");
                         break;
                     case FakeSCPDeathCause.DECONTAMINATION:
                         Cassie.Message("SCP " + processedtonumber + " LOST IN DECONTAMINATION SEQUENCE");
+                        subtitles.Add(new Subtitles.SubtitlePart(Subtitles.SubtitleType.LostInDecontamination, new string[0]));
                         break;
                 }
 
-                SCP079Handler.GainXP(player, Cost);
+                new Subtitles.SubtitleMessage(subtitles.ToArray()).SendToAuthenticated(0);
+
                 SCP079Handler.lastGlobalUse = DateTime.Now;
+                SCP079Handler.GainXP(player, Cost);
                 lastUse = DateTime.Now;
 
                 RLogger.Log("SCP079 EVENT", "FAKESCP", $"{player.PlayerToString()} requested fakescp of SCP {processedtonumber} with reason: {reason}");

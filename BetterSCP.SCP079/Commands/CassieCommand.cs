@@ -65,7 +65,7 @@ namespace Mistaken.BetterSCP.SCP079.Commands
 
             Events.EventHandler.OnUseCassie(new Events.SCP079UseCassieEventArgs(player, message));
 
-            Cassie.Message("PITCH_0.9 SCP 0 PITCH_0.9 7 PITCH_0.9 9 PITCH_0.9 jam_050_5 OVERRIDE PITCH_1 . . . " + message);
+            Respawning.RespawnEffectsController.PlayCassieAnnouncement("PITCH_0.9 SCP 0 PITCH_0.9 7 PITCH_0.9 9 PITCH_0.9 jam_050_5 OVERRIDE PITCH_1 . . . " + message, false, false, true);
             SCP079Handler.GainXP(player, Cost);
             lastUse = DateTime.Now;
             RLogger.Log("SCP079 EVENT", "CASSIE", $"{player.PlayerToString()} requested cassie \"{message}\"");
