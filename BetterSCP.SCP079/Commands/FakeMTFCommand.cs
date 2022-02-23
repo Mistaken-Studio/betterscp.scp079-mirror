@@ -81,7 +81,7 @@ namespace Mistaken.BetterSCP.SCP079.Commands
             Cassie.Message($"MTFUNIT EPSILON 11 DESIGNATED NATO_{letter} {number} HASENTERED ALLREMAINING AWAITINGRECONTAINMENT {scps} SCPSUBJECT{(scps == 1 ? string.Empty : "S")}");
             List<Subtitles.SubtitlePart> list = new List<Subtitles.SubtitlePart>
             {
-                new Subtitles.SubtitlePart(Subtitles.SubtitleType.NTFEntrance, new string[] { $"NATO_{letter} {number}" }),
+                new Subtitles.SubtitlePart(Subtitles.SubtitleType.NTFEntrance, new string[] { unitName }),
             };
 
             if (scps == 1)
