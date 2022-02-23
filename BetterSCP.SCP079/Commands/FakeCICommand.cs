@@ -65,7 +65,7 @@ namespace Mistaken.BetterSCP.SCP079.Commands
                     {
                         Events.EventHandler.OnUseFakeCI(new Events.SCP079UseFakeCIEventArgs(player));
 
-                        Cassie.Message(BetterRP.BetterRPHandler.CIAnnouncments[UnityEngine.Random.Range(0, BetterRP.BetterRPHandler.CIAnnouncments.Length)]);
+                        Respawning.RespawnEffectsController.PlayCassieAnnouncement(BetterRP.BetterRPHandler.CIAnnouncments[UnityEngine.Random.Range(0, BetterRP.BetterRPHandler.CIAnnouncments.Length)], false, false, true);
                         SCP079Handler.GainXP(player, Cost);
                         lastUse = DateTime.Now;
 
