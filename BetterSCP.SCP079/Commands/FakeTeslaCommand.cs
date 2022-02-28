@@ -37,21 +37,27 @@ namespace Mistaken.BetterSCP.SCP079.Commands
             {
                 if (player.Energy >= Cost)
                 {
-                    if (IsReady)
+                    if (SCP079Handler.IsGlobalReady)
                     {
-                        Events.EventHandler.OnUseFakeTesla(new Events.SCP079UseFakeTeslaEventArgs(player));
+                        if (IsReady)
+                        {
+                            Events.EventHandler.OnUseFakeTesla(new Events.SCP079UseFakeTeslaEventArgs(player));
 
-                        Cassie.Message("Tesla gates deactivated by order of NINETAILEDFOX COMMANDER");
-                        SCP079Handler.GainXP(player, Cost);
-                        lastUse = DateTime.Now;
+                            Cassie.Message("Tesla gates deactivated by order of NINETAILEDFOX COMMANDER");
+                            SCP079Handler.GainXP(player, Cost);
+                            SCP079Handler.lastGlobalUse = DateTime.Now;
+                            lastUse = DateTime.Now;
 
-                        RLogger.Log("SCP079 EVENT", "FAKETESLA", $"{player.PlayerToString()} requested faketesla");
+                            RLogger.Log("SCP079 EVENT", "FAKETESLA", $"{player.PlayerToString()} requested faketesla");
 
-                        success = true;
-                        return new string[] { PluginHandler.Instance.Translation.Success };
+                            success = true;
+                            return new string[] { PluginHandler.Instance.Translation.Success };
+                        }
+                        else
+                            return new string[] { PluginHandler.Instance.Translation.FailedCooldown.Replace("${time}", Cooldown.ToString()) };
                     }
                     else
-                        return new string[] { PluginHandler.Instance.Translation.FailedCooldown.Replace("${time}", Cooldown.ToString()) };
+                        return new string[] { PluginHandler.Instance.Translation.FailedGlobalCooldown.Replace("${time}", SCP079Handler.GlobalCooldown.ToString()) };
                 }
                 else
                     return new string[] { PluginHandler.Instance.Translation.FailedAP.Replace("${ap}", Cost.ToString()) };

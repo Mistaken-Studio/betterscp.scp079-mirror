@@ -17,6 +17,8 @@ namespace Mistaken.BetterSCP.SCP079
 
         public string FailedAP { get; set; } = "You must have at least ${ap} AP";
 
+        public string FailedGlobalCooldown { get; set; } = "You have to wait ${time} seconds before sending another command because there's cooldown";
+
         public string FailedCooldown { get; set; } = "You have to wait ${time} seconds because there's cooldown";
 
         public string FailedCooldownBlackout { get; set; } = "You have to wait ${time} seconds because there's cooldown, ${leftS} left";

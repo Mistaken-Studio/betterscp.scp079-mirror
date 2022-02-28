@@ -43,8 +43,12 @@ namespace Mistaken.BetterSCP.SCP079.Commands
                         return new string[] { "Usage: " + this.GetUsage() };
                     else
                     {
-                        if (int.TryParse(args[0], out int duration))
+                        if (int.TryParse(args[0], out int duration) || args[0].ToString().ToLower().Contains("max"))
                         {
+                            if (args[0].ToString().ToLower().Contains("max"))
+                            {
+                                duration = player.Energy.ToString()[0];
+                            }
                             var toDrain = duration * Cost;
                             float cooldown = duration * BlackoutCommand.Cooldown;
 

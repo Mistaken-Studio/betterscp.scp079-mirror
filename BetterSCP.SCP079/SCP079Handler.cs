@@ -19,6 +19,12 @@ namespace Mistaken.BetterSCP.SCP079
 {
     internal class SCP079Handler : Module
     {
+        public static float GlobalCooldown => PluginHandler.Instance.Config.GlobalCooldown;
+        public static bool IsGlobalReady => lastGlobalUse.AddSeconds(GlobalCooldown).Ticks <= DateTime.Now.Ticks;
+        public static long GlobalTimeLeft => lastGlobalUse.AddSeconds(GlobalCooldown).Ticks - DateTime.Now.Ticks;
+        public static DateTime lastGlobalUse = default(DateTime);
+
+
         public static void GainXP(Player player, float ap)
         {
             player.Energy -= ap;
