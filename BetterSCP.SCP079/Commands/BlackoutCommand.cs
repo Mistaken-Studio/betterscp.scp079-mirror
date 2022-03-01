@@ -43,12 +43,13 @@ namespace Mistaken.BetterSCP.SCP079.Commands
                         return new string[] { "Usage: " + this.GetUsage() };
                     else
                     {
-                        if (int.TryParse(args[0], out int duration) || args[0].ToString().ToLower().Contains("max"))
+                        if (int.TryParse(args[0], out int duration) || args[0].ToLower() == "max")
                         {
-                            if (args[0].ToString().ToLower().Contains("max"))
+                            if (args[0].ToLower() == "max")
                             {
-                                duration = player.Energy.ToString()[0];
+                                duration = (int)Math.Floor(player.Energy / BlackoutCommand.Cost);
                             }
+
                             var toDrain = duration * Cost;
                             float cooldown = duration * BlackoutCommand.Cooldown;
 
@@ -97,12 +98,12 @@ namespace Mistaken.BetterSCP.SCP079.Commands
 
         internal static long TimeLeft => lastUse.Ticks - DateTime.Now.Ticks;
 
-        private static DateTime lastUse = default(DateTime);
+        private static DateTime lastUse = default;
         private float lastCooldown;
 
         private string GetUsage()
         {
-            return ".blackout [duration]";
+            return ".blackout [duration/max]";
         }
     }
 }
