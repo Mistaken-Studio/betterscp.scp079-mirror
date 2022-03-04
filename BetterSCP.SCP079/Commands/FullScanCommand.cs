@@ -89,10 +89,10 @@ namespace Mistaken.BetterSCP.SCP079.Commands
 
             Events.EventHandler.OnUseScan(new Events.SCP079UseScanEventArgs(player, true));
 
-                        if (message != "Full facility scan initiated")
-                            Respawning.RespawnEffectsController.PlayCassieAnnouncement(message, false, false, true);
-                        else
-                            Respawning.RespawnEffectsController.PlayCassieAnnouncement("DETECTED UNKNOWN SECURITY SYSTEM ERROR . FAILED TO SCAN", false, false, true);
+            if (message != "Full facility scan initiated")
+                Respawning.RespawnEffectsController.PlayCassieAnnouncement(message, false, false, true);
+            else
+                Respawning.RespawnEffectsController.PlayCassieAnnouncement("DETECTED UNKNOWN SECURITY SYSTEM ERROR . FAILED TO SCAN", false, false, true);
 
             SCP079Handler.GainXP(player, Cost);
             lastUse = DateTime.Now;
