@@ -24,7 +24,6 @@ namespace Mistaken.BetterSCP.SCP079
         public static long GlobalTimeLeft => lastGlobalUse.AddSeconds(GlobalCooldown).Ticks - DateTime.Now.Ticks;
         public static DateTime lastGlobalUse = default(DateTime);
 
-
         public static void GainXP(Player player, float ap)
         {
             player.Energy -= ap;
