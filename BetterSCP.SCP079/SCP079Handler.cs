@@ -19,6 +19,11 @@ namespace Mistaken.BetterSCP.SCP079
 {
     internal class SCP079Handler : Module
     {
+        public static float GlobalCooldown => PluginHandler.Instance.Config.GlobalCooldown;
+        public static bool IsGlobalReady => lastGlobalUse.AddSeconds(GlobalCooldown).Ticks <= DateTime.Now.Ticks;
+        public static long GlobalTimeLeft => lastGlobalUse.AddSeconds(GlobalCooldown).Ticks - DateTime.Now.Ticks;
+        public static DateTime lastGlobalUse = default(DateTime);
+
         public static void GainXP(Player player, float ap)
         {
             player.Energy -= ap;
@@ -189,13 +194,6 @@ namespace Mistaken.BetterSCP.SCP079
                     else if (FakeCICommand.Cost > player.Energy)
                         fakeCI = string.Format(PluginHandler.Instance.Translation.RequireAP, FakeCICommand.Cost);
 
-                    if (FakeTeslaCommand.ReqLvl > player.Level + 1)
-                        fakeTesla = string.Format(PluginHandler.Instance.Translation.RequireLevel, FakeTeslaCommand.ReqLvl);
-                    else if (!FakeTeslaCommand.IsReady)
-                        fakeTesla = string.Format(PluginHandler.Instance.Translation.RequireCooldown, Math.Round(new TimeSpan(FakeTeslaCommand.TimeLeft).TotalSeconds));
-                    else if (FakeTeslaCommand.Cost > player.Energy)
-                        fakeTesla = string.Format(PluginHandler.Instance.Translation.RequireAP, FakeTeslaCommand.Cost);
-
                     if (ScanCommand.ReqLvl > player.Level + 1)
                         scan = string.Format(PluginHandler.Instance.Translation.RequireLevel, ScanCommand.ReqLvl);
                     else if (!ScanCommand.IsReady)
@@ -238,12 +236,18 @@ namespace Mistaken.BetterSCP.SCP079
                     else if (MapScan_CostPerStart > player.Energy)
                         advancedScan = string.Format(PluginHandler.Instance.Translation.RequireAP, MapScan_CostPerStart);
 
+                    if (!IsGlobalReady)
+                    {
+                        fakeCI = string.Format(PluginHandler.Instance.Translation.RequireCooldown, Math.Round(new TimeSpan(GlobalTimeLeft).TotalSeconds));
+                        fakeMTF = string.Format(PluginHandler.Instance.Translation.RequireCooldown, Math.Round(new TimeSpan(GlobalTimeLeft).TotalSeconds));
+                        fakeSCP = string.Format(PluginHandler.Instance.Translation.RequireCooldown, Math.Round(new TimeSpan(GlobalTimeLeft).TotalSeconds));
+                    }
+
                     string sumMessage = $@"<br><br><br><br><br>
 <size=50%>
 <align=left>Fake SCP</align><line-height=1px><br></line-height><align=right>{fakeSCP}</align>
 <align=left>Fake MTF</align><line-height=1px><br></line-height><align=right>{fakeMTF}</align>
 <align=left>Fake CI</align><line-height=1px><br></line-height><align=right>{fakeCI}</align>
-<align=left>Fake Tesla</align><line-height=1px><br></line-height><align=right>{fakeTesla}</align>
 <align=left>Scan</align><line-height=1px><br></line-height><align=right>{scan}</align>
 <align=left>FullScan</align><line-height=1px><br></line-height><align=right>{fullScan}</align>
 <align=left>Blackout</align><line-height=1px><br></line-height><align=right>{blackout}</align>

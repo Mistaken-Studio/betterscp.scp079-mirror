@@ -57,38 +57,32 @@ namespace Mistaken.BetterSCP.SCP079.Commands
             var player = sender.GetPlayer();
             if (player.Role != RoleType.Scp079)
                 return new string[] { "Only SCP 079" };
-            if (player.Level >= ReqLvl - 1)
-            {
-                if (player.Energy >= Cost)
-                {
-                    if (IsReady)
-                    {
-                        Events.EventHandler.OnUseFakeCI(new Events.SCP079UseFakeCIEventArgs(player));
 
-                        Cassie.Message(BetterRP.BetterRPHandler.CIAnnouncments[UnityEngine.Random.Range(0, BetterRP.BetterRPHandler.CIAnnouncments.Length)]);
-                        SCP079Handler.GainXP(player, Cost);
-                        lastUse = DateTime.Now;
-
-                        RLogger.Log("SCP079 EVENT", "FAKECI", $"{player.PlayerToString()} requested fakeci");
-
-                        success = true;
-                        return new string[] { PluginHandler.Instance.Translation.Success };
-                    }
-                    else
-                        return new string[] { PluginHandler.Instance.Translation.FailedCooldown.Replace("${time}", Cooldown.ToString()) };
-                }
-                else
-                    return new string[] { PluginHandler.Instance.Translation.FailedAP.Replace("${ap}", Cost.ToString()) };
-            }
-            else
+            if (player.Level < ReqLvl - 1)
                 return new string[] { PluginHandler.Instance.Translation.FailedLvl.Replace("${lvl}", ReqLvl.ToString()) };
+
+            if (player.Energy < Cost)
+                return new string[] { PluginHandler.Instance.Translation.FailedAP.Replace("${ap}", Cost.ToString()) };
+
+            if (!SCP079Handler.IsGlobalReady)
+                return new string[] { PluginHandler.Instance.Translation.FailedGlobalCooldown.Replace("${time}", SCP079Handler.GlobalCooldown.ToString()) };
+
+            if (!IsReady)
+                return new string[] { PluginHandler.Instance.Translation.FailedCooldown.Replace("${time}", Cooldown.ToString()) };
+
+            Events.EventHandler.OnUseFakeCI(new Events.SCP079UseFakeCIEventArgs(player));
+
+            Cassie.Message(BetterRP.BetterRPHandler.CIAnnouncments[UnityEngine.Random.Range(0, BetterRP.BetterRPHandler.CIAnnouncments.Length)]);
+            SCP079Handler.GainXP(player, Cost);
+            SCP079Handler.lastGlobalUse = DateTime.Now;
+            lastUse = DateTime.Now;
+
+            RLogger.Log("SCP079 EVENT", "FAKECI", $"{player.PlayerToString()} requested fakeci");
+
+            success = true;
+            return new string[] { PluginHandler.Instance.Translation.Success };
         }
 
         private static DateTime lastUse = default(DateTime);
-
-        private string GetUsage()
-        {
-            return ".fakeci";
-        }
     }
 }
