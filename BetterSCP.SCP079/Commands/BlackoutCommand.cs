@@ -21,9 +21,6 @@ namespace Mistaken.BetterSCP.SCP079.Commands
         public override string Command => "blackout";
 
         /// <inheritdoc/>
-        public override string[] Aliases => new string[] { };
-
-        /// <inheritdoc/>
         public override string Description => "Do blackout";
 
         /// <inheritdoc/>
@@ -33,59 +30,45 @@ namespace Mistaken.BetterSCP.SCP079.Commands
             success = false;
             if (player.Role != RoleType.Scp079)
                 return new string[] { "Only SCP 079" };
+
             if (API.Utilities.Map.Overheat.LockBlackout)
                 return new string[] { "Access denied\nFacility blackout system lockdown is active" };
-            if (player.Level >= ReqLvl - 1)
-            {
-                if (IsReady)
-                {
-                    if (args.Length == 0)
-                        return new string[] { "Usage: " + this.GetUsage() };
-                    else
-                    {
-                        if (int.TryParse(args[0], out int duration) || args[0].ToLower() == "max")
-                        {
-                            if (args[0].ToLower() == "max")
-                            {
-                                duration = (int)Math.Floor(player.Energy / BlackoutCommand.Cost);
-                            }
 
-                            var toDrain = duration * Cost;
-                            float cooldown = duration * BlackoutCommand.Cooldown;
-
-                            if (player.Energy >= toDrain)
-                            {
-                                Events.EventHandler.OnUseBlackout(new Events.SCP079UseBlackoutEventArgs(player, toDrain));
-
-                                Map.TurnOffAllLights(duration);
-
-                                SCP079Handler.GainXP(player, toDrain);
-                                lastUse = DateTime.Now.AddSeconds(cooldown);
-                                this.lastCooldown = cooldown;
-                                RLogger.Log("SCP079 EVENT", "BLACKOUT", $"{player.PlayerToString()} requested blackout for {duration}s");
-                                success = true;
-                                return new string[] { PluginHandler.Instance.Translation.Success };
-                            }
-                            else
-                                return new string[] { PluginHandler.Instance.Translation.FailedAP.Replace("${ap}", toDrain.ToString()) };
-                        }
-                        else
-                        {
-                            float max = float.MaxValue;
-                            string toreturn = PluginHandler.Instance.Translation.FailedNoNumberBlackout.Replace("${max}", max.ToString());
-                            return new string[] { toreturn };
-                        }
-                    }
-                }
-                else
-                {
-                    return new string[] { PluginHandler.Instance.Translation.FailedCooldownBlackout.Replace("${time}", this.lastCooldown.ToString()).Replace("${leftS}", (lastUse - DateTime.Now).TotalSeconds.ToString()) };
-                }
-            }
-            else
-            {
+            if (player.Level < ReqLvl - 1)
                 return new string[] { PluginHandler.Instance.Translation.FailedLvl.Replace("${lvl}", ReqLvl.ToString()) };
+
+            if (!IsReady)
+                return new string[] { PluginHandler.Instance.Translation.FailedCooldownBlackout.Replace("${time}", this.lastCooldown.ToString()).Replace("${leftS}", (lastUse - DateTime.Now).TotalSeconds.ToString()) };
+
+            if (args.Length == 0)
+                return new string[] { "Usage: " + this.GetUsage() };
+
+            int duration;
+            if (args[0].ToLower() == "max")
+                duration = (int)Math.Floor(player.Energy / BlackoutCommand.Cost);
+            else if (!int.TryParse(args[0], out duration))
+            {
+                float max = float.MaxValue;
+                string toreturn = PluginHandler.Instance.Translation.FailedNoNumberBlackout.Replace("${max}", max.ToString());
+                return new string[] { toreturn };
             }
+
+            var toDrain = duration * Cost;
+            float cooldown = duration * BlackoutCommand.Cooldown;
+
+            if (player.Energy < toDrain)
+                return new string[] { PluginHandler.Instance.Translation.FailedAP.Replace("${ap}", toDrain.ToString()) };
+
+            Events.EventHandler.OnUseBlackout(new Events.SCP079UseBlackoutEventArgs(player, toDrain));
+
+            Map.TurnOffAllLights(duration);
+
+            SCP079Handler.GainXP(player, toDrain);
+            lastUse = DateTime.Now.AddSeconds(cooldown);
+            this.lastCooldown = cooldown;
+            RLogger.Log("SCP079 EVENT", "BLACKOUT", $"{player.PlayerToString()} requested blackout for {duration}s");
+            success = true;
+            return new string[] { PluginHandler.Instance.Translation.Success };
         }
 
         internal static float Cooldown => PluginHandler.Instance.Config.CooldownBlackout;
