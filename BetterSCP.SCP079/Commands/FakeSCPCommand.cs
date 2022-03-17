@@ -149,7 +149,7 @@ namespace Mistaken.BetterSCP.SCP079.Commands
 
                 new Subtitles.SubtitleMessage(subtitles.ToArray()).SendToAuthenticated(0);
 
-                SCP079Handler.lastGlobalUse = DateTime.Now;
+                SCP079Handler.LastGlobalUse = DateTime.Now;
                 SCP079Handler.GainXP(player, Cost);
                 lastUse = DateTime.Now;
 
@@ -175,7 +175,7 @@ namespace Mistaken.BetterSCP.SCP079.Commands
 
         internal static long TimeLeft => lastUse.AddSeconds(Cooldown).Ticks - DateTime.Now.Ticks;
 
-        private static DateTime lastUse = default(DateTime);
+        private static DateTime lastUse = default;
 
         private string GetUsage()
         {

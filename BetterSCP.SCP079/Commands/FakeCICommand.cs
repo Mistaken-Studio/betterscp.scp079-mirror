@@ -74,7 +74,7 @@ namespace Mistaken.BetterSCP.SCP079.Commands
 
             Respawning.RespawnEffectsController.PlayCassieAnnouncement(BetterRP.BetterRPHandler.CIAnnouncments[UnityEngine.Random.Range(0, BetterRP.BetterRPHandler.CIAnnouncments.Length)], false, false, true);
             SCP079Handler.GainXP(player, Cost);
-            SCP079Handler.lastGlobalUse = DateTime.Now;
+            SCP079Handler.LastGlobalUse = DateTime.Now;
             lastUse = DateTime.Now;
 
             RLogger.Log("SCP079 EVENT", "FAKECI", $"{player.PlayerToString()} requested fakeci");
@@ -83,6 +83,6 @@ namespace Mistaken.BetterSCP.SCP079.Commands
             return new string[] { PluginHandler.Instance.Translation.Success };
         }
 
-        private static DateTime lastUse = default(DateTime);
+        private static DateTime lastUse = default;
     }
 }
