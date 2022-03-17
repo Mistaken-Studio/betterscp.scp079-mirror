@@ -7,8 +7,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Exiled.API.Enums;
 using Exiled.API.Features;
+using Exiled.Events.EventArgs;
 using Mistaken.API;
+using Mistaken.API.CustomItems;
 using Mistaken.API.Diagnostics;
 using Mistaken.API.Extensions;
 using Mistaken.API.GUI;
@@ -44,6 +47,7 @@ namespace Mistaken.BetterSCP.SCP079
             SCPGUIHandler.SCPMessages[RoleType.Scp079] = PluginHandler.Instance.Translation.StartMessage;
 
             Exiled.Events.Handlers.Server.RoundStarted += this.Server_RoundStarted;
+            Exiled.Events.Handlers.Player.InteractingDoor += this.Player_InteractingDoor;
         }
 
         public override void OnDisable()
@@ -51,6 +55,7 @@ namespace Mistaken.BetterSCP.SCP079
             SCPGUIHandler.SCPMessages.Remove(RoleType.Scp079);
 
             Exiled.Events.Handlers.Server.RoundStarted -= this.Server_RoundStarted;
+            Exiled.Events.Handlers.Player.InteractingDoor -= this.Player_InteractingDoor;
         }
 
         internal static void HandleMapScan(Player player, bool value)
@@ -109,6 +114,20 @@ namespace Mistaken.BetterSCP.SCP079
         {
             GlassPatch.Reload();
             this.RunCoroutine(this.UpdateGeneratorsTimer(), "UpdateGeneratorsTimer");
+        }
+
+        private void Player_InteractingDoor(InteractingDoorEventArgs ev)
+        {
+            if ((ev.IsAllowed && ev.Door.Type == DoorType.Scp106Primary) || (ev.IsAllowed && ev.Door.Type == DoorType.Scp106Secondary) || (ev.IsAllowed && ev.Door.Type == DoorType.Scp106Bottom))
+            {
+                if ((!MistakenCustomItem.TryGet(MistakenCustomItems.DEPUTY_FACILITY_MANAGER_KEYCARD, out MistakenCustomItem deputyFacilityManagerKeycard) && deputyFacilityManagerKeycard.Check(ev.Player.CurrentItem)) || (!MistakenCustomItem.TryGet(MistakenCustomItems.GUARD_COMMANDER_KEYCARD, out MistakenCustomItem guardCommanderKeycard) && guardCommanderKeycard.Check(ev.Player.CurrentItem)))
+                {
+                    foreach (var player in RealPlayers.List.Where(p => p.Role != RoleType.Scp079))
+                    {
+                        player.SetGUI("scp079", PseudoGUIPosition.MIDDLE, PluginHandler.Instance.Translation.SCP106Opened, 8);
+                    }
+                }
+            }
         }
 
         private IEnumerator<float> UpdateGeneratorsTimer()
