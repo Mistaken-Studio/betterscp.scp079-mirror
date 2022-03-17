@@ -5,6 +5,7 @@
 // -----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using CommandSystem;
 using Exiled.API.Features;
@@ -13,6 +14,7 @@ using Mistaken.API.Commands;
 using Mistaken.API.Diagnostics;
 using Mistaken.API.Extensions;
 using Mistaken.RoundLogger;
+using Utils.Networking;
 
 namespace Mistaken.BetterSCP.SCP079.Commands
 {
@@ -36,56 +38,66 @@ namespace Mistaken.BetterSCP.SCP079.Commands
             var player = sender.GetPlayer();
             if (player.Role != RoleType.Scp079)
                 return new string[] { "Only SCP 079" };
-            if (player.Level >= ReqLvl - 1)
-            {
-                if (player.Energy >= Cost)
-                {
-                    if (IsReady)
-                    {
-                        Events.EventHandler.OnUseFakeMTF(new Events.SCP079UseFakeMTFEventArgs(player));
 
-                        Respawning.NamingRules.UnitNamingRules.TryGetNamingRule(Respawning.SpawnableTeamType.NineTailedFox, out var ntfRule);
-                        ntfRule.GenerateNew(Respawning.SpawnableTeamType.NineTailedFox, out string unitName);
-                        string number = unitName.Split('-')[1];
-                        char letter = unitName[0];
-
-                        if (lastFakeUnitIndex != -1)
-                        {
-                            Respawning.NamingRules.UnitNamingRule.UsedCombinations.Remove(lastFakeUnit);
-                            Respawning.RespawnManager.Singleton.NamingManager.AllUnitNames.RemoveAt(lastFakeUnitIndex);
-                        }
-
-                        lastFakeUnit = unitName;
-                        lastFakeUnitIndex = Respawning.RespawnManager.Singleton.NamingManager.AllUnitNames.Count - 1;
-                        string tmp = Respawning.RespawnManager.Singleton.NamingManager.AllUnitNames[Respawning.RespawnManager.Singleton.NamingManager.AllUnitNames.Count - 2].UnitName;
-                        int colorIndex = tmp.IndexOf("<color=");
-                        if (colorIndex != -1)
-                        {
-                            string color = tmp.Substring(colorIndex + 7, tmp.IndexOf('>', colorIndex) - (colorIndex + 7));
-                            Log.Debug(color, PluginHandler.Instance.Config.VerbouseOutput);
-                            Map.ChangeUnitColor(lastFakeUnitIndex, color);
-
-                            Module.CallSafeDelayed(2, () => SCPGUIHandler.ResyncAllUnits(), "FAKEMTF.ResyncAllUnits");
-                        }
-
-                        int scps = RealPlayers.List.Where(p => p.Team == Team.SCP && p.Role != RoleType.Scp0492).Count();
-                        Cassie.Message($"MTFUNIT EPSILON 11 DESIGNATED NATO_{letter} {number} HASENTERED ALLREMAINING AWAITINGRECONTAINMENT {scps} SCPSUBJECT{(scps == 1 ? string.Empty : "S")}");
-                        SCP079Handler.GainXP(player, Cost);
-                        lastUse = DateTime.Now;
-
-                        RLogger.Log("SCP079 EVENT", "FAKEMTF", $"{player.PlayerToString()} requested fakemtf");
-
-                        success = true;
-                        return new string[] { PluginHandler.Instance.Translation.Success };
-                    }
-                    else
-                        return new string[] { PluginHandler.Instance.Translation.FailedCooldown.Replace("${time}", Cooldown.ToString()) };
-                }
-                else
-                    return new string[] { PluginHandler.Instance.Translation.FailedAP.Replace("${ap}", Cost.ToString()) };
-            }
-            else
+            if (player.Level < ReqLvl - 1)
                 return new string[] { PluginHandler.Instance.Translation.FailedLvl.Replace("${lvl}", ReqLvl.ToString()) };
+
+            if (player.Energy < Cost)
+                return new string[] { PluginHandler.Instance.Translation.FailedAP.Replace("${ap}", Cost.ToString()) };
+
+            if (!SCP079Handler.IsGlobalReady)
+                return new string[] { PluginHandler.Instance.Translation.FailedGlobalCooldown.Replace("${time}", SCP079Handler.GlobalCooldown.ToString()) };
+
+            if (!IsReady)
+                return new string[] { PluginHandler.Instance.Translation.FailedCooldown.Replace("${time}", Cooldown.ToString()) };
+
+            Events.EventHandler.OnUseFakeMTF(new Events.SCP079UseFakeMTFEventArgs(player));
+
+            Respawning.NamingRules.UnitNamingRules.TryGetNamingRule(Respawning.SpawnableTeamType.NineTailedFox, out var ntfRule);
+            ntfRule.GenerateNew(Respawning.SpawnableTeamType.NineTailedFox, out string unitName);
+            string number = unitName.Split('-')[1];
+            char letter = unitName[0];
+
+            if (lastFakeUnitIndex != -1)
+            {
+                Respawning.NamingRules.UnitNamingRule.UsedCombinations.Remove(lastFakeUnit);
+                Respawning.RespawnManager.Singleton.NamingManager.AllUnitNames.RemoveAt(lastFakeUnitIndex);
+            }
+
+            lastFakeUnit = unitName;
+            lastFakeUnitIndex = Respawning.RespawnManager.Singleton.NamingManager.AllUnitNames.Count - 1;
+            string tmp = Respawning.RespawnManager.Singleton.NamingManager.AllUnitNames[Respawning.RespawnManager.Singleton.NamingManager.AllUnitNames.Count - 2].UnitName;
+            int colorIndex = tmp.IndexOf("<color=");
+            if (colorIndex != -1)
+            {
+                string color = tmp.Substring(colorIndex + 7, tmp.IndexOf('>', colorIndex) - (colorIndex + 7));
+                Log.Debug(color, PluginHandler.Instance.Config.VerbouseOutput);
+                Map.ChangeUnitColor(lastFakeUnitIndex, color);
+
+                Module.CallSafeDelayed(2, () => SCPGUIHandler.ResyncAllUnits(), "FAKEMTF.ResyncAllUnits");
+            }
+
+            int scps = RealPlayers.List.Where(p => p.Team == Team.SCP && p.Role != RoleType.Scp0492).Count(); // Can't be 0 because there has to be 079
+            Cassie.Message($"MTFUNIT EPSILON 11 DESIGNATED NATO_{letter} {number} HASENTERED ALLREMAINING AWAITINGRECONTAINMENT {scps} SCPSUBJECT{(scps == 1 ? string.Empty : "S")}");
+            List<Subtitles.SubtitlePart> list = new List<Subtitles.SubtitlePart>
+            {
+                new Subtitles.SubtitlePart(Subtitles.SubtitleType.NTFEntrance, new string[] { unitName }),
+            };
+
+            if (scps == 1)
+                list.Add(new Subtitles.SubtitlePart(Subtitles.SubtitleType.AwaitContainSingle, null));
+            else
+                list.Add(new Subtitles.SubtitlePart(Subtitles.SubtitleType.AwaitContainPlural, new string[] { scps.ToString() }));
+
+            new Subtitles.SubtitleMessage(list.ToArray()).SendToAuthenticated(0);
+            SCP079Handler.GainXP(player, Cost);
+            SCP079Handler.lastGlobalUse = DateTime.Now;
+            lastUse = DateTime.Now;
+
+            RLogger.Log("SCP079 EVENT", "FAKEMTF", $"{player.PlayerToString()} requested fakemtf");
+
+            success = true;
+            return new string[] { PluginHandler.Instance.Translation.Success };
         }
 
         internal static float Cooldown => PluginHandler.Instance.Config.Cooldown;

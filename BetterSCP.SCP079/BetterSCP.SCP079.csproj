@@ -71,7 +71,6 @@
     <Compile Include="Commands\FakeCICommand.cs" />
     <Compile Include="Commands\FakeMTFCommand.cs" />
     <Compile Include="Commands\FakeSCPCommand.cs" />
-    <Compile Include="Commands\FakeTeslaCommand.cs" />
     <Compile Include="Commands\FullScanCommand.cs" />
     <Compile Include="Commands\ScanCommand.cs" />
     <Compile Include="Commands\StopWarheadCommand.cs" />

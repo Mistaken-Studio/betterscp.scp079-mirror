@@ -38,38 +38,27 @@ namespace Mistaken.BetterSCP.SCP079.Commands
                 return new string[] { "Warhead is not detonating" };
             if (Warhead.IsLocked || BetterWarheadHandler.Warhead.StopLock)
                 return new string[] { "Warhead is locked" };
-            if (player.Level >= ReqLvl - 1)
-            {
-                if (player.Energy >= Cost)
-                {
-                    if (IsReady)
-                    {
-                        Events.EventHandler.OnUseWarheadStop(new Events.SCP079UseStopEventArgs(player));
-                        Warhead.Stop();
-                        Warhead.LeverStatus = false;
-                        Cassie.Message("PITCH_0.8 You jam_070_3 will jam_050_5 .g5 no jam_040_9 detonate me", false, false);
-                        SCP079Handler.GainXP(player, Cost);
-                        lastUse = DateTime.Now;
 
-                        RLogger.Log("SCP079 EVENT", "STOPWARHEAD", $"{player.PlayerToString()} requested stopwarhead");
-
-                        success = true;
-                        return new string[] { PluginHandler.Instance.Translation.Success };
-                    }
-                    else
-                    {
-                        return new string[] { PluginHandler.Instance.Translation.FailedCooldown.Replace("${time}", Cooldown.ToString()) };
-                    }
-                }
-                else
-                {
-                    return new string[] { PluginHandler.Instance.Translation.FailedAP.Replace("${ap}", Cost.ToString()) };
-                }
-            }
-            else
-            {
+            if (player.Level < ReqLvl - 1)
                 return new string[] { PluginHandler.Instance.Translation.FailedLvl.Replace("${lvl}", ReqLvl.ToString()) };
-            }
+
+            if (player.Energy < Cost)
+                return new string[] { PluginHandler.Instance.Translation.FailedAP.Replace("${ap}", Cost.ToString()) };
+
+            if (!IsReady)
+                return new string[] { PluginHandler.Instance.Translation.FailedCooldown.Replace("${time}", Cooldown.ToString()) };
+
+            Events.EventHandler.OnUseWarheadStop(new Events.SCP079UseStopEventArgs(player));
+            Warhead.Stop();
+            Warhead.LeverStatus = false;
+            Respawning.RespawnEffectsController.PlayCassieAnnouncement("PITCH_0.8 You jam_070_3 will jam_050_5 .g5 no jam_040_9 detonate me", false, false, true);
+            SCP079Handler.GainXP(player, Cost);
+            lastUse = DateTime.Now;
+
+            RLogger.Log("SCP079 EVENT", "STOPWARHEAD", $"{player.PlayerToString()} requested stopwarhead");
+
+            success = true;
+            return new string[] { PluginHandler.Instance.Translation.Success };
         }
 
         internal static float Cooldown => PluginHandler.Instance.Config.CooldownStopWarhead;

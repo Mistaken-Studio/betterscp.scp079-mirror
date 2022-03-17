@@ -5,12 +5,14 @@
 // -----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using CommandSystem;
 using Exiled.API.Features;
 using Mistaken.API.Commands;
 using Mistaken.API.Extensions;
 using Mistaken.RoundLogger;
+using Utils.Networking;
 
 namespace Mistaken.BetterSCP.SCP079.Commands
 {
@@ -49,108 +51,118 @@ namespace Mistaken.BetterSCP.SCP079.Commands
             success = false;
             if (player.Role != RoleType.Scp079)
                 return new string[] { "Only SCP 079" };
-            if (player.Level >= ReqLvl - 1)
+
+            if (player.Level < ReqLvl - 1)
+                return new string[] { PluginHandler.Instance.Translation.FailedLvl.Replace("${lvl}", ReqLvl.ToString()) };
+
+            if (player.Energy < Cost)
+                return new string[] { PluginHandler.Instance.Translation.FailedAP.Replace("${ap}", Cost.ToString()) };
+
+            if (!SCP079Handler.IsGlobalReady)
+                return new string[] { PluginHandler.Instance.Translation.FailedGlobalCooldown.Replace("${time}", SCP079Handler.GlobalCooldown.ToString()) };
+
+            if (!IsReady)
+                return new string[] { PluginHandler.Instance.Translation.FailedCooldown.Replace("${time}", Cooldown.ToString()) };
+
+            if (args.Length == 0 || !int.TryParse(args[0], out int rawReason) || rawReason < 1 || rawReason > 6)
             {
-                if (player.Energy >= Cost)
+                return new string[]
                 {
-                    if (IsReady)
+                    ".fakescp [przyczyna] [scp]",
+                    "Podaj przyczynę śmierci:",
+                    "1. Tesla",
+                    "2. CI",
+                    "3. Klasa D",
+                    "4. Nieznany",
+                    "5. Zrekontaminowany (Działa tylko na SCP-106)",
+                    "6. Śmierć w Dekontaminacji LCZ",
+                };
+            }
+
+            FakeSCPDeathCause reason = (FakeSCPDeathCause)rawReason;
+
+            args = args.Skip(1).ToArray();
+            if (args.Length == 0)
+            {
+                int max = short.MaxValue;
+                return new string[] { PluginHandler.Instance.Translation.FailedNoNumber.Replace("${max}", max.ToString()) };
+            }
+
+            string processed = string.Empty;
+            foreach (char item in string.Join(string.Empty, args).ToCharArray())
+            {
+                if (item == ' ') continue;
+                processed += item;
+            }
+
+            if (processed.Length <= 5)
+            {
+                if (!short.TryParse(processed, out _))
+                    return new string[] { PluginHandler.Instance.Translation.FailedWrongNumber.Replace("${max}", short.MaxValue.ToString()) };
+                string processedtonumber = " ";
+                foreach (char item in processed.ToCharArray())
+                {
+                    if (item != ' ')
                     {
-                        if (args.Length == 0 || !int.TryParse(args[0], out int rawReason) || rawReason < 1 || rawReason > 6)
+                        try
                         {
-                            return new string[]
-                            {
-                                ".fakescp [przyczyna] [scp]",
-                                "Podaj przyczynę śmierci:",
-                                "1. Tesla",
-                                "2. CI",
-                                "3. Klasa D",
-                                "4. Nieznany",
-                                "5. Zrekontaminowany (Działa tylko na SCP-106)",
-                                "6. Śmierć w Dekontaminacji LCZ",
-                            };
+                            if (short.TryParse(item.ToString(), out short num)) processedtonumber += num + " ";
                         }
-
-                        FakeSCPDeathCause reason = (FakeSCPDeathCause)rawReason;
-
-                        args = args.Skip(1).ToArray();
-                        if (args.Length == 0)
+                        catch
                         {
-                            int max = short.MaxValue;
-                            return new string[] { PluginHandler.Instance.Translation.FailedNoNumber.Replace("${max}", max.ToString()) };
-                        }
-
-                        string processed = string.Empty;
-                        foreach (char item in string.Join(string.Empty, args).ToCharArray())
-                        {
-                            if (item == ' ') continue;
-                            processed += item;
-                        }
-
-                        if (processed.Length <= 5)
-                        {
-                            if (!short.TryParse(processed, out _))
-                                return new string[] { PluginHandler.Instance.Translation.FailedWrongNumber.Replace("${max}", short.MaxValue.ToString()) };
-                            string processedtonumber = " ";
-                            foreach (char item in processed.ToCharArray())
-                            {
-                                if (item != ' ')
-                                {
-                                    try
-                                    {
-                                        if (short.TryParse(item.ToString(), out short num)) processedtonumber += num + " ";
-                                    }
-                                    catch
-                                    {
-                                    }
-                                }
-                            }
-
-                            Events.EventHandler.OnUseFakeSCP(new Events.SCP079UseFakeSCPEventArgs(player, processedtonumber, reason));
-
-                            switch (reason)
-                            {
-                                case FakeSCPDeathCause.TESLA:
-                                    Cassie.Message("SCP " + processedtonumber + " SUCCESSFULLY TERMINATED BY AUTOMATIC SECURITY SYSTEM");
-                                    break;
-                                case FakeSCPDeathCause.CHAOS:
-                                    Cassie.Message("SCP " + processedtonumber + " SUCCESSFULLY TERMINATED BY CHAOSINSURGENCY");
-                                    break;
-                                case FakeSCPDeathCause.CLASSD:
-                                    Cassie.Message("SCP " + processedtonumber + " CONTAINEDSUCCESSFULLY BY CLASSD PERSONNEL");
-                                    break;
-                                case FakeSCPDeathCause.UNKNOWN:
-                                    Cassie.Message("SCP " + processedtonumber + " SUCCESSFULLY TERMINATED . TERMINATION CAUSE UNSPECIFIED");
-                                    break;
-                                case FakeSCPDeathCause.RECONTAINMENT:
-                                    Cassie.Message("SCP 1 0 6 RECONTAINED SUCCESSFULLY");
-                                    break;
-                                case FakeSCPDeathCause.DECONTAMINATION:
-                                    Cassie.Message("SCP " + processedtonumber + " LOST IN DECONTAMINATION SEQUENCE");
-                                    break;
-                            }
-
-                            SCP079Handler.GainXP(player, Cost);
-                            lastUse = DateTime.Now;
-
-                            RLogger.Log("SCP079 EVENT", "FAKESCP", $"{player.PlayerToString()} requested fakescp of SCP {processedtonumber} with reason: {reason}");
-
-                            success = true;
-                            return new string[] { PluginHandler.Instance.Translation.Success };
-                        }
-                        else
-                        {
-                            int max = short.MaxValue;
-                            return new string[] { PluginHandler.Instance.Translation.FailedWrongNumber.Replace("${max}", max.ToString()) };
                         }
                     }
-                    else
-                        return new string[] { PluginHandler.Instance.Translation.FailedCooldown.Replace("${time}", Cooldown.ToString()) };
                 }
-                else
-                    return new string[] { PluginHandler.Instance.Translation.FailedAP.Replace("${ap}", Cost.ToString()) };
+
+                Events.EventHandler.OnUseFakeSCP(new Events.SCP079UseFakeSCPEventArgs(player, processedtonumber, reason));
+
+                List<Subtitles.SubtitlePart> subtitles = new List<Subtitles.SubtitlePart>(1);
+                if (reason == FakeSCPDeathCause.RECONTAINMENT)
+                    processedtonumber = "1 0 6";
+                subtitles.Add(new Subtitles.SubtitlePart(Subtitles.SubtitleType.SCP, new string[] { "SCP-" + processedtonumber.Replace(" ", string.Empty) }));
+                switch (reason)
+                {
+                    case FakeSCPDeathCause.TESLA:
+                        Cassie.Message("SCP " + processedtonumber + " SUCCESSFULLY TERMINATED BY AUTOMATIC SECURITY SYSTEM");
+                        subtitles.Add(new Subtitles.SubtitlePart(Subtitles.SubtitleType.TerminatedBySecuritySystem, new string[0]));
+                        break;
+                    case FakeSCPDeathCause.CHAOS:
+                        Cassie.Message("SCP " + processedtonumber + " SUCCESSFULLY TERMINATED BY CHAOSINSURGENCY");
+                        subtitles.Add(new Subtitles.SubtitlePart(Subtitles.SubtitleType.ContainedByChaos, new string[0]));
+                        break;
+                    case FakeSCPDeathCause.CLASSD:
+                        Cassie.Message("SCP " + processedtonumber + " CONTAINEDSUCCESSFULLY BY CLASSD PERSONNEL");
+                        subtitles.Add(new Subtitles.SubtitlePart(Subtitles.SubtitleType.ContainedByClassD, new string[0]));
+                        break;
+                    case FakeSCPDeathCause.UNKNOWN:
+                        Cassie.Message("SCP " + processedtonumber + " SUCCESSFULLY TERMINATED . TERMINATION CAUSE UNSPECIFIED");
+                        subtitles.Add(new Subtitles.SubtitlePart(Subtitles.SubtitleType.TerminationCauseUnspecified, new string[0]));
+                        break;
+                    case FakeSCPDeathCause.RECONTAINMENT:
+                        Cassie.Message("SCP 1 0 6 RECONTAINED SUCCESSFULLY");
+                        break;
+                    case FakeSCPDeathCause.DECONTAMINATION:
+                        Cassie.Message("SCP " + processedtonumber + " LOST IN DECONTAMINATION SEQUENCE");
+                        subtitles.Add(new Subtitles.SubtitlePart(Subtitles.SubtitleType.LostInDecontamination, new string[0]));
+                        break;
+                }
+
+                new Subtitles.SubtitleMessage(subtitles.ToArray()).SendToAuthenticated(0);
+
+                SCP079Handler.lastGlobalUse = DateTime.Now;
+                SCP079Handler.GainXP(player, Cost);
+                lastUse = DateTime.Now;
+
+                RLogger.Log("SCP079 EVENT", "FAKESCP", $"{player.PlayerToString()} requested fakescp of SCP {processedtonumber} with reason: {reason}");
+
+                success = true;
+                return new string[] { PluginHandler.Instance.Translation.Success };
             }
             else
-                return new string[] { PluginHandler.Instance.Translation.FailedLvl.Replace("${lvl}", ReqLvl.ToString()) };
+            {
+                int max = short.MaxValue;
+                return new string[] { PluginHandler.Instance.Translation.FailedWrongNumber.Replace("${max}", max.ToString()) };
+            }
         }
 
         internal static float Cooldown => PluginHandler.Instance.Config.Cooldown;
