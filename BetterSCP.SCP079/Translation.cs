@@ -52,5 +52,7 @@ namespace Mistaken.BetterSCP.SCP079
         public string HelicopterLanding { get; set; } = "<color=#00008f><b>Helicopter is landing</b></color> in {0}s";
 
         public string CarArriving { get; set; } = "<color=#008f00><b>Car is arriving</b></color> in {0}s";
+
+        public string SCP106Opened { get; set; } = "<color=#red><b>Warning! SCP-106 Chamber has been opened!</b></color>";
     }
 }

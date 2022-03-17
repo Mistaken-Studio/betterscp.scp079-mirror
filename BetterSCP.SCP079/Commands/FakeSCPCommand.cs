@@ -85,7 +85,7 @@ namespace Mistaken.BetterSCP.SCP079.Commands
                             foreach (char item in string.Join(string.Empty, args).ToCharArray())
                             {
                                if (item == ' ') continue;
-                                processed += item;
+                               processed += item;
                             }
 
                             if (processed.Length <= 5)
@@ -115,24 +115,24 @@ namespace Mistaken.BetterSCP.SCP079.Commands
                                         Cassie.Message("SCP " + processedtonumber + " SUCCESSFULLY TERMINATED BY AUTOMATIC SECURITY SYSTEM");
                                         break;
                                     case FakeSCPDeathCause.CHAOS:
-                                     Cassie.Message("SCP " + processedtonumber + " SUCCESSFULLY TERMINATED BY CHAOSINSURGENCY");
-                                     break;
-                                 case FakeSCPDeathCause.CLASSD:
-                                     Cassie.Message("SCP " + processedtonumber + " CONTAINEDSUCCESSFULLY BY CLASSD PERSONNEL");
-                                     break;
-                                 case FakeSCPDeathCause.UNKNOWN:
-                                     Cassie.Message("SCP " + processedtonumber + " SUCCESSFULLY TERMINATED . TERMINATION CAUSE UNSPECIFIED");
-                                     break;
-                                 case FakeSCPDeathCause.RECONTAINMENT:
-                                     Cassie.Message("SCP 1 0 6 RECONTAINED SUCCESSFULLY");
-                                     break;
-                                 case FakeSCPDeathCause.DECONTAMINATION:
-                                     Cassie.Message("SCP " + processedtonumber + " LOST IN DECONTAMINATION SEQUENCE");
-                                     break;
+                                        Cassie.Message("SCP " + processedtonumber + " SUCCESSFULLY TERMINATED BY CHAOSINSURGENCY");
+                                        break;
+                                    case FakeSCPDeathCause.CLASSD:
+                                        Cassie.Message("SCP " + processedtonumber + " CONTAINEDSUCCESSFULLY BY CLASSD PERSONNEL");
+                                        break;
+                                    case FakeSCPDeathCause.UNKNOWN:
+                                        Cassie.Message("SCP " + processedtonumber + " SUCCESSFULLY TERMINATED . TERMINATION CAUSE UNSPECIFIED");
+                                        break;
+                                    case FakeSCPDeathCause.RECONTAINMENT:
+                                        Cassie.Message("SCP 1 0 6 RECONTAINED SUCCESSFULLY");
+                                        break;
+                                    case FakeSCPDeathCause.DECONTAMINATION:
+                                        Cassie.Message("SCP " + processedtonumber + " LOST IN DECONTAMINATION SEQUENCE");
+                                        break;
                                 }
 
                                 SCP079Handler.GainXP(player, Cost);
-                                SCP079Handler.lastGlobalUse = DateTime.Now;
+                                SCP079Handler.LastGlobalUse = DateTime.Now;
                                 lastUse = DateTime.Now;
 
                                 RLogger.Log("SCP079 EVENT", "FAKESCP", $"{player.PlayerToString()} requested fakescp of SCP {processedtonumber} with reason: {reason}");
@@ -169,7 +169,7 @@ namespace Mistaken.BetterSCP.SCP079.Commands
 
         internal static long TimeLeft => lastUse.AddSeconds(Cooldown).Ticks - DateTime.Now.Ticks;
 
-        private static DateTime lastUse = default(DateTime);
+        private static DateTime lastUse = default;
 
         private string GetUsage()
         {

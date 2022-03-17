@@ -73,7 +73,7 @@ namespace Mistaken.BetterSCP.SCP079.Commands
                             int scps = RealPlayers.List.Where(p => p.Team == Team.SCP && p.Role != RoleType.Scp0492).Count();
                             Cassie.Message($"MTFUNIT EPSILON 11 DESIGNATED NATO_{letter} {number} HASENTERED ALLREMAINING AWAITINGRECONTAINMENT {scps} SCPSUBJECT{(scps == 1 ? string.Empty : "S")}");
                             SCP079Handler.GainXP(player, Cost);
-                            SCP079Handler.lastGlobalUse = DateTime.Now;
+                            SCP079Handler.LastGlobalUse = DateTime.Now;
                             lastUse = DateTime.Now;
 
                             RLogger.Log("SCP079 EVENT", "FAKEMTF", $"{player.PlayerToString()} requested fakemtf");
@@ -104,7 +104,7 @@ namespace Mistaken.BetterSCP.SCP079.Commands
 
         internal static long TimeLeft => lastUse.AddSeconds(Cooldown).Ticks - DateTime.Now.Ticks;
 
-        private static DateTime lastUse = default(DateTime);
+        private static DateTime lastUse = default;
         private static string lastFakeUnit = null;
         private static int lastFakeUnitIndex = -1;
 
