@@ -139,7 +139,7 @@ namespace Mistaken.BetterSCP.SCP079
 
                 foreach (var player in RealPlayers.List.Where(p => p.Role == RoleType.Scp079))
                 {
-                    player.SetGUI("scp079", PseudoGUIPosition.MIDDLE, PluginHandler.Instance.Translation.SCP106Opened, 8);
+                    player.SetGUI("scp079-106door", PseudoGUIPosition.MIDDLE, PluginHandler.Instance.Translation.SCP106Opened, 8);
                 }
             }
         }
