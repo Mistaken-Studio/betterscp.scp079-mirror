@@ -45,7 +45,7 @@ namespace Mistaken.BetterSCP.SCP079.Commands
 
                             Cassie.Message("Tesla gates deactivated by order of NINETAILEDFOX COMMANDER");
                             SCP079Handler.GainXP(player, Cost);
-                            SCP079Handler.lastGlobalUse = DateTime.Now;
+                            SCP079Handler.LastGlobalUse = DateTime.Now;
                             lastUse = DateTime.Now;
 
                             RLogger.Log("SCP079 EVENT", "FAKETESLA", $"{player.PlayerToString()} requested faketesla");
