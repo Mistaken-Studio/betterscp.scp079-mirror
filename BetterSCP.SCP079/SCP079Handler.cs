@@ -126,14 +126,20 @@ namespace Mistaken.BetterSCP.SCP079
 
         private void Player_InteractingDoor(InteractingDoorEventArgs ev)
         {
-            if ((ev.IsAllowed && ev.Door.Type == DoorType.Scp106Primary) || (ev.IsAllowed && ev.Door.Type == DoorType.Scp106Secondary) || (ev.IsAllowed && ev.Door.Type == DoorType.Scp106Bottom))
+            if (!ev.IsAllowed)
+                return;
+
+            if (ev.Door.Type == DoorType.Scp106Primary || ev.Door.Type == DoorType.Scp106Secondary || ev.Door.Type == DoorType.Scp106Bottom)
             {
-                if ((!MistakenCustomItem.TryGet(MistakenCustomItems.DEPUTY_FACILITY_MANAGER_KEYCARD, out MistakenCustomItem deputyFacilityManagerKeycard) && deputyFacilityManagerKeycard.Check(ev.Player.CurrentItem)) || (!MistakenCustomItem.TryGet(MistakenCustomItems.GUARD_COMMANDER_KEYCARD, out MistakenCustomItem guardCommanderKeycard) && guardCommanderKeycard.Check(ev.Player.CurrentItem)))
+                if (MistakenCustomItem.TryGet(MistakenCustomItems.DEPUTY_FACILITY_MANAGER_KEYCARD, out MistakenCustomItem deputyFacilityManagerKeycard) && deputyFacilityManagerKeycard.Check(ev.Player.CurrentItem))
+                    return;
+
+                if (MistakenCustomItem.TryGet(MistakenCustomItems.GUARD_COMMANDER_KEYCARD, out MistakenCustomItem guardCommanderKeycard) && guardCommanderKeycard.Check(ev.Player.CurrentItem))
+                    return;
+
+                foreach (var player in RealPlayers.List.Where(p => p.Role == RoleType.Scp079))
                 {
-                    foreach (var player in RealPlayers.List.Where(p => p.Role != RoleType.Scp079))
-                    {
-                        player.SetGUI("scp079", PseudoGUIPosition.MIDDLE, PluginHandler.Instance.Translation.SCP106Opened, 8);
-                    }
+                    player.SetGUI("scp079", PseudoGUIPosition.MIDDLE, PluginHandler.Instance.Translation.SCP106Opened, 8);
                 }
             }
         }
