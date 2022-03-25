@@ -46,7 +46,7 @@ namespace Mistaken.BetterSCP.SCP079
                     new CodeInstruction(OpCodes.Br_S, continueLabel),
                     new CodeInstruction(OpCodes.Nop).WithLabels(label),
 
-                    new CodeInstruction(OpCodes.Call, AccessTools.PropertyGetter(typeof(Map), nameof(Map.ActivatedGenerators))),
+                    new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(GlassPatch), nameof(GlassPatch.ActivatedGenerators))),
                     new CodeInstruction(OpCodes.Ldc_I4_3),
                     new CodeInstruction(OpCodes.Beq_S, continueLabel),
                     new CodeInstruction(OpCodes.Ret),
@@ -58,5 +58,8 @@ namespace Mistaken.BetterSCP.SCP079
             ListPool<CodeInstruction>.Shared.Return(newInstructions);
             yield break;
         }
+
+        private static int ActivatedGenerators()
+            => Generator.List.Count(x => x.IsEngaged);
     }
 }

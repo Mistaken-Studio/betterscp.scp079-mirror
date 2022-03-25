@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Exiled.API.Features;
+using Exiled.API.Features.Roles;
 using Mistaken.API;
 using Mistaken.API.Diagnostics;
 using Mistaken.API.Extensions;
@@ -20,19 +21,23 @@ namespace Mistaken.BetterSCP.SCP079
     internal class SCP079Handler : Module
     {
         public static float GlobalCooldown => PluginHandler.Instance.Config.GlobalCooldown;
+
         public static bool IsGlobalReady => lastGlobalUse.AddSeconds(GlobalCooldown).Ticks <= DateTime.Now.Ticks;
+
         public static long GlobalTimeLeft => lastGlobalUse.AddSeconds(GlobalCooldown).Ticks - DateTime.Now.Ticks;
+
         public static DateTime lastGlobalUse = default(DateTime);
 
         public static void GainXP(Player player, float ap)
         {
-            player.Energy -= ap;
-            var id = player.Level;
-            if (id >= player.Levels.Length)
-                id = (byte)(player.Levels.Length - 1);
+            var scp = (Scp079Role)player.Role;
+            scp.Energy -= ap;
+            var id = scp.Level;
+            if (id >= scp.Levels.Length)
+                id = (byte)(scp.Levels.Length - 1);
             else if (id < 0)
                 id = 0;
-            float num4 = 1f / Mathf.Clamp(player.Levels[id].manaPerSecond / 1.5f, 1f, 5f);
+            float num4 = 1f / Mathf.Clamp(scp.Levels[id].manaPerSecond / 1.5f, 1f, 5f);
             ap = Mathf.Round(ap * num4 * 10f) / 10f;
             player.ReferenceHub.scp079PlayerScript.AddExperience(ap);
         }
@@ -82,19 +87,20 @@ namespace Mistaken.BetterSCP.SCP079
 
         private static IEnumerator<float> HandleNewGUI(Player player)
         {
-            if (player.Level < MapScan_RequiedLvl)
+            var scp = (Scp079Role)player.Role;
+            if (scp.Level < MapScan_RequiedLvl)
                 yield break;
 
-            if (player.Energy < MapScan_CostPerStart)
+            if (scp.Energy < MapScan_CostPerStart)
                 yield break;
             PressingAltVCKey.Add(player);
-            player.Energy -= MapScan_CostPerStart;
+            scp.Energy -= MapScan_CostPerStart;
             List<Vector3> lastData = new List<Vector3>();
             while (PressingAltVCKey.Contains(player))
             {
-                if (player.Energy < MapScan_CostPerUpdate)
+                if (scp.Energy < MapScan_CostPerUpdate)
                     break;
-                player.Energy -= MapScan_CostPerUpdate;
+                scp.Energy -= MapScan_CostPerUpdate;
                 lastData = RealPlayers.List.Where(x => x.IsAlive).Select(x => x.Position).ToList();
                 player.ReferenceHub.scp079PlayerScript.TargetSetupIndicators(player.Connection, lastData);
                 yield return MEC.Timing.WaitForSeconds(MapScan_UpdateRate);
@@ -162,6 +168,7 @@ namespace Mistaken.BetterSCP.SCP079
 
                 foreach (var player in RealPlayers.Get(RoleType.Scp079))
                 {
+                    var scp = (Scp079Role)player.Role;
                     string fakeSCP = PluginHandler.Instance.Translation.Ready;
                     string fakeMTF = PluginHandler.Instance.Translation.Ready;
                     string fakeCI = PluginHandler.Instance.Translation.Ready;
@@ -173,67 +180,67 @@ namespace Mistaken.BetterSCP.SCP079
                     string cassie = PluginHandler.Instance.Translation.Ready;
                     string advancedScan = PluginHandler.Instance.Translation.Ready;
 
-                    if (FakeSCPCommand.ReqLvl > player.Level + 1)
+                    if (FakeSCPCommand.ReqLvl > scp.Level + 1)
                         fakeSCP = string.Format(PluginHandler.Instance.Translation.RequireLevel, FakeSCPCommand.ReqLvl);
                     else if (!FakeSCPCommand.IsReady)
                         fakeSCP = string.Format(PluginHandler.Instance.Translation.RequireCooldown, Math.Round(new TimeSpan(FakeSCPCommand.TimeLeft).TotalSeconds));
-                    else if (FakeSCPCommand.Cost > player.Energy)
+                    else if (FakeSCPCommand.Cost > scp.Energy)
                         fakeSCP = string.Format(PluginHandler.Instance.Translation.RequireAP, FakeSCPCommand.Cost);
 
-                    if (FakeMTFCommand.ReqLvl > player.Level + 1)
+                    if (FakeMTFCommand.ReqLvl > scp.Level + 1)
                         fakeMTF = string.Format(PluginHandler.Instance.Translation.RequireLevel, FakeMTFCommand.ReqLvl);
                     else if (!FakeMTFCommand.IsReady)
                         fakeMTF = string.Format(PluginHandler.Instance.Translation.RequireCooldown, Math.Round(new TimeSpan(FakeMTFCommand.TimeLeft).TotalSeconds));
-                    else if (FakeMTFCommand.Cost > player.Energy)
+                    else if (FakeMTFCommand.Cost > scp.Energy)
                         fakeMTF = string.Format(PluginHandler.Instance.Translation.RequireAP, FakeMTFCommand.Cost);
 
-                    if (FakeCICommand.ReqLvl > player.Level + 1)
+                    if (FakeCICommand.ReqLvl > scp.Level + 1)
                         fakeCI = string.Format(PluginHandler.Instance.Translation.RequireLevel, FakeCICommand.ReqLvl);
                     else if (!FakeCICommand.IsReady)
                         fakeCI = string.Format(PluginHandler.Instance.Translation.RequireCooldown, Math.Round(new TimeSpan(FakeCICommand.TimeLeft).TotalSeconds));
-                    else if (FakeCICommand.Cost > player.Energy)
+                    else if (FakeCICommand.Cost > scp.Energy)
                         fakeCI = string.Format(PluginHandler.Instance.Translation.RequireAP, FakeCICommand.Cost);
 
-                    if (ScanCommand.ReqLvl > player.Level + 1)
+                    if (ScanCommand.ReqLvl > scp.Level + 1)
                         scan = string.Format(PluginHandler.Instance.Translation.RequireLevel, ScanCommand.ReqLvl);
                     else if (!ScanCommand.IsReady)
                         scan = string.Format(PluginHandler.Instance.Translation.RequireCooldown, Math.Round(new TimeSpan(ScanCommand.TimeLeft).TotalSeconds));
-                    else if (ScanCommand.Cost > player.Energy)
+                    else if (ScanCommand.Cost > scp.Energy)
                         scan = string.Format(PluginHandler.Instance.Translation.RequireAP, ScanCommand.Cost);
 
-                    if (FullScanCommand.ReqLvl > player.Level + 1)
+                    if (FullScanCommand.ReqLvl > scp.Level + 1)
                         fullScan = string.Format(PluginHandler.Instance.Translation.RequireLevel, FullScanCommand.ReqLvl);
                     else if (!FullScanCommand.IsReady)
                         fullScan = string.Format(PluginHandler.Instance.Translation.RequireCooldown, Math.Round(new TimeSpan(FullScanCommand.TimeLeft).TotalSeconds));
-                    else if (FullScanCommand.Cost > player.Energy)
+                    else if (FullScanCommand.Cost > scp.Energy)
                         fullScan = string.Format(PluginHandler.Instance.Translation.RequireAP, FullScanCommand.Cost);
 
-                    if (BlackoutCommand.ReqLvl > player.Level + 1)
+                    if (BlackoutCommand.ReqLvl > scp.Level + 1)
                         blackout = string.Format(PluginHandler.Instance.Translation.RequireLevel, BlackoutCommand.ReqLvl);
                     else if (!BlackoutCommand.IsReady)
                         blackout = string.Format(PluginHandler.Instance.Translation.RequireCooldown, Math.Round(new TimeSpan(BlackoutCommand.TimeLeft).TotalSeconds));
                     else
-                        blackout = string.Format(PluginHandler.Instance.Translation.MaxBlackout, Math.Floor(player.Energy / BlackoutCommand.Cost));
+                        blackout = string.Format(PluginHandler.Instance.Translation.MaxBlackout, Math.Floor(scp.Energy / BlackoutCommand.Cost));
 
-                    if (StopWarheadCommand.ReqLvl > player.Level + 1)
+                    if (StopWarheadCommand.ReqLvl > scp.Level + 1)
                         warheadStop = string.Format(PluginHandler.Instance.Translation.RequireLevel, StopWarheadCommand.ReqLvl);
                     else if (!StopWarheadCommand.IsReady)
                         warheadStop = string.Format(PluginHandler.Instance.Translation.RequireCooldown, Math.Round(new TimeSpan(StopWarheadCommand.TimeLeft).TotalSeconds));
-                    else if (StopWarheadCommand.Cost > player.Energy)
+                    else if (StopWarheadCommand.Cost > scp.Energy)
                         warheadStop = string.Format(PluginHandler.Instance.Translation.RequireAP, StopWarheadCommand.Cost);
                     else if (!Warhead.IsInProgress)
                         warheadStop = PluginHandler.Instance.Translation.WarheadDetonating;
 
-                    if (CassieCommand.ReqLvl > player.Level + 1)
+                    if (CassieCommand.ReqLvl > scp.Level + 1)
                         cassie = string.Format(PluginHandler.Instance.Translation.RequireLevel, CassieCommand.ReqLvl);
                     else if (!CassieCommand.IsReady)
                         cassie = string.Format(PluginHandler.Instance.Translation.RequireCooldown, Math.Round(new TimeSpan(CassieCommand.TimeLeft).TotalSeconds));
-                    else if (CassieCommand.Cost > player.Energy)
+                    else if (CassieCommand.Cost > scp.Energy)
                         cassie = string.Format(PluginHandler.Instance.Translation.RequireAP, CassieCommand.Cost);
 
-                    if (MapScan_RequiedLvl > player.Level + 1)
+                    if (MapScan_RequiedLvl > scp.Level + 1)
                         advancedScan = string.Format(PluginHandler.Instance.Translation.RequireLevel, MapScan_RequiedLvl);
-                    else if (MapScan_CostPerStart > player.Energy)
+                    else if (MapScan_CostPerStart > scp.Energy)
                         advancedScan = string.Format(PluginHandler.Instance.Translation.RequireAP, MapScan_CostPerStart);
 
                     if (!IsGlobalReady)

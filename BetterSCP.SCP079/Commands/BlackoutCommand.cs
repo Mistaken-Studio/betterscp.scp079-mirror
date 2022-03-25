@@ -7,6 +7,7 @@
 using System;
 using CommandSystem;
 using Exiled.API.Features;
+using Exiled.API.Features.Roles;
 using Mistaken.API.Commands;
 using Mistaken.API.Extensions;
 using Mistaken.RoundLogger;
@@ -27,6 +28,7 @@ namespace Mistaken.BetterSCP.SCP079.Commands
         public override string[] Execute(ICommandSender sender, string[] args, out bool success)
         {
             var player = sender.GetPlayer();
+            var scp = (Scp079Role)player.Role;
             success = false;
             if (player.Role != RoleType.Scp079)
                 return new string[] { "Only SCP 079" };
@@ -34,7 +36,7 @@ namespace Mistaken.BetterSCP.SCP079.Commands
             if (API.Utilities.Map.Overheat.LockBlackout)
                 return new string[] { "Access denied\nFacility blackout system lockdown is active" };
 
-            if (player.Level < ReqLvl - 1)
+            if (scp.Level < ReqLvl - 1)
                 return new string[] { PluginHandler.Instance.Translation.FailedLvl.Replace("${lvl}", ReqLvl.ToString()) };
 
             if (!IsReady)
@@ -45,7 +47,7 @@ namespace Mistaken.BetterSCP.SCP079.Commands
 
             int duration;
             if (args[0].ToLower() == "max")
-                duration = (int)Math.Floor(player.Energy / BlackoutCommand.Cost);
+                duration = (int)Math.Floor(scp.Energy / BlackoutCommand.Cost);
             else if (!int.TryParse(args[0], out duration))
             {
                 float max = float.MaxValue;
@@ -56,7 +58,7 @@ namespace Mistaken.BetterSCP.SCP079.Commands
             var toDrain = duration * Cost;
             float cooldown = duration * BlackoutCommand.Cooldown;
 
-            if (player.Energy < toDrain)
+            if (scp.Energy < toDrain)
                 return new string[] { PluginHandler.Instance.Translation.FailedAP.Replace("${ap}", toDrain.ToString()) };
 
             Events.EventHandler.OnUseBlackout(new Events.SCP079UseBlackoutEventArgs(player, toDrain));

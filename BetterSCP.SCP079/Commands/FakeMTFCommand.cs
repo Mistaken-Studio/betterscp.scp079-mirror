@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using CommandSystem;
 using Exiled.API.Features;
+using Exiled.API.Features.Roles;
 using Mistaken.API;
 using Mistaken.API.Commands;
 using Mistaken.API.Diagnostics;
@@ -36,13 +37,14 @@ namespace Mistaken.BetterSCP.SCP079.Commands
         {
             success = false;
             var player = sender.GetPlayer();
+            var scp = (Scp079Role)player.Role;
             if (player.Role != RoleType.Scp079)
                 return new string[] { "Only SCP 079" };
 
-            if (player.Level < ReqLvl - 1)
+            if (scp.Level < ReqLvl - 1)
                 return new string[] { PluginHandler.Instance.Translation.FailedLvl.Replace("${lvl}", ReqLvl.ToString()) };
 
-            if (player.Energy < Cost)
+            if (scp.Energy < Cost)
                 return new string[] { PluginHandler.Instance.Translation.FailedAP.Replace("${ap}", Cost.ToString()) };
 
             if (!SCP079Handler.IsGlobalReady)
@@ -77,7 +79,7 @@ namespace Mistaken.BetterSCP.SCP079.Commands
                 Module.CallSafeDelayed(2, () => SCPGUIHandler.ResyncAllUnits(), "FAKEMTF.ResyncAllUnits");
             }
 
-            int scps = RealPlayers.List.Where(p => p.Team == Team.SCP && p.Role != RoleType.Scp0492).Count(); // Can't be 0 because there has to be 079
+            int scps = RealPlayers.List.Where(p => p.Role.Team == Team.SCP && p.Role != RoleType.Scp0492).Count(); // Can't be 0 because there has to be 079
             Cassie.Message($"MTFUNIT EPSILON 11 DESIGNATED NATO_{letter} {number} HASENTERED ALLREMAINING AWAITINGRECONTAINMENT {scps} SCPSUBJECT{(scps == 1 ? string.Empty : "S")}");
             List<Subtitles.SubtitlePart> list = new List<Subtitles.SubtitlePart>
             {
