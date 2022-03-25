@@ -54,6 +54,7 @@ namespace Mistaken.BetterSCP.SCP079
             SCPGUIHandler.SCPMessages[RoleType.Scp079] = PluginHandler.Instance.Translation.StartMessage;
 
             Exiled.Events.Handlers.Server.RoundStarted += this.Server_RoundStarted;
+            Exiled.Events.Handlers.Player.VoiceChatting += this.Player_VoiceChatting;
         }
 
         public override void OnDisable()
@@ -61,16 +62,7 @@ namespace Mistaken.BetterSCP.SCP079
             SCPGUIHandler.SCPMessages.Remove(RoleType.Scp079);
 
             Exiled.Events.Handlers.Server.RoundStarted -= this.Server_RoundStarted;
-        }
-
-        internal static void HandleMapScan(Player player, bool value)
-        {
-            player.ReferenceHub.dissonanceUserSetup.MimicAs939 = false;
-
-            if (value)
-                MEC.Timing.RunCoroutine(HandleNewGUI(player));
-            else
-                PressingAltVCKey.Remove(player);
+            Exiled.Events.Handlers.Player.VoiceChatting -= this.Player_VoiceChatting;
         }
 
         private static readonly HashSet<Player> PressingAltVCKey = new HashSet<Player>();
@@ -120,6 +112,20 @@ namespace Mistaken.BetterSCP.SCP079
         {
             GlassPatch.Reload();
             this.RunCoroutine(this.UpdateGeneratorsTimer(), "UpdateGeneratorsTimer");
+        }
+
+        private void Player_VoiceChatting(Exiled.Events.EventArgs.VoiceChattingEventArgs ev)
+        {
+            if (ev.Player == null)
+                return;
+            if (ev.Player.Role.Type != RoleType.Scp079)
+                return;
+            ev.DissonanceUserSetup.MimicAs939 = false;
+
+            if (ev.IsVoiceChatting)
+                MEC.Timing.RunCoroutine(HandleNewGUI(ev.Player));
+            else
+                PressingAltVCKey.Remove(ev.Player);
         }
 
         private IEnumerator<float> UpdateGeneratorsTimer()

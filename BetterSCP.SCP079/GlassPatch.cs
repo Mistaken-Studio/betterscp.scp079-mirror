@@ -4,6 +4,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
@@ -46,7 +47,7 @@ namespace Mistaken.BetterSCP.SCP079
                     new CodeInstruction(OpCodes.Br_S, continueLabel),
                     new CodeInstruction(OpCodes.Nop).WithLabels(label),
 
-                    new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(GlassPatch), nameof(GlassPatch.ActivatedGenerators))),
+                    new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(GlassPatch), nameof(GlassPatch.ActiveGenerators))),
                     new CodeInstruction(OpCodes.Ldc_I4_3),
                     new CodeInstruction(OpCodes.Beq_S, continueLabel),
                     new CodeInstruction(OpCodes.Ret),
@@ -59,7 +60,7 @@ namespace Mistaken.BetterSCP.SCP079
             yield break;
         }
 
-        private static int ActivatedGenerators()
-            => Generator.List.Count(x => x.IsEngaged);
+        private static int ActiveGenerators()
+            => Generator.List.Where(x => x.IsEngaged).Count();
     }
 }
