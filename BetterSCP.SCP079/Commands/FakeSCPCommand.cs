@@ -121,7 +121,7 @@ namespace Mistaken.BetterSCP.SCP079.Commands
                 List<Subtitles.SubtitlePart> subtitles = new List<Subtitles.SubtitlePart>(1);
                 if (reason == FakeSCPDeathCause.RECONTAINMENT)
                     processedtonumber = "1 0 6";
-                subtitles.Add(new Subtitles.SubtitlePart(Subtitles.SubtitleType.SCP, new string[] { "SCP-" + processedtonumber.Replace(" ", string.Empty) }));
+                subtitles.Add(new Subtitles.SubtitlePart(Subtitles.SubtitleType.SCP, new string[] { processedtonumber.Replace(" ", string.Empty) }));
                 switch (reason)
                 {
                     case FakeSCPDeathCause.TESLA:
@@ -142,6 +142,7 @@ namespace Mistaken.BetterSCP.SCP079.Commands
                         break;
                     case FakeSCPDeathCause.RECONTAINMENT:
                         Cassie.Message("SCP 1 0 6 RECONTAINED SUCCESSFULLY");
+                        subtitles.Add(new Subtitles.SubtitlePart(Subtitles.SubtitleType.Custom, new string[] { "RECONTAINED SUCCESSFULLY" }));
                         break;
                     case FakeSCPDeathCause.DECONTAMINATION:
                         Cassie.Message("SCP " + processedtonumber + " LOST IN DECONTAMINATION SEQUENCE");
