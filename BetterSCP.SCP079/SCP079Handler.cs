@@ -54,7 +54,7 @@ namespace Mistaken.BetterSCP.SCP079
             SCPGUIHandler.SCPMessages[RoleType.Scp079] = PluginHandler.Instance.Translation.StartMessage;
 
             Exiled.Events.Handlers.Server.RoundStarted += this.Server_RoundStarted;
-            Exiled.Events.Handlers.Player.VoiceChatting += this.Player_VoiceChatting;
+            Exiled.Events.Handlers.Player.Transmitting += this.Player_Transmitting;
         }
 
         public override void OnDisable()
@@ -62,8 +62,18 @@ namespace Mistaken.BetterSCP.SCP079
             SCPGUIHandler.SCPMessages.Remove(RoleType.Scp079);
 
             Exiled.Events.Handlers.Server.RoundStarted -= this.Server_RoundStarted;
-            Exiled.Events.Handlers.Player.VoiceChatting -= this.Player_VoiceChatting;
+            Exiled.Events.Handlers.Player.Transmitting -= this.Player_Transmitting;
         }
+
+        /*internal static void HandleMapScan(Player player, bool value)
+        {
+            player.ReferenceHub.dissonanceUserSetup.MimicAs939 = false;
+
+            if (value)
+                MEC.Timing.RunCoroutine(HandleNewGUI(player));
+            else
+                PressingAltVCKey.Remove(player);
+        }*/
 
         private static readonly HashSet<Player> PressingAltVCKey = new HashSet<Player>();
 
@@ -114,15 +124,15 @@ namespace Mistaken.BetterSCP.SCP079
             this.RunCoroutine(this.UpdateGeneratorsTimer(), "UpdateGeneratorsTimer");
         }
 
-        private void Player_VoiceChatting(Exiled.Events.EventArgs.VoiceChattingEventArgs ev)
+        private void Player_Transmitting(Exiled.Events.EventArgs.TransmittingEventArgs ev)
         {
-            if (ev.Player == null)
+            if (ev.Player is null)
                 return;
             if (ev.Player.Role.Type != RoleType.Scp079)
                 return;
-            ev.DissonanceUserSetup.MimicAs939 = false;
+            ev.Player.ReferenceHub.dissonanceUserSetup.MimicAs939 = false;
 
-            if (ev.IsVoiceChatting)
+            if (ev.IsTransmitting)
                 MEC.Timing.RunCoroutine(HandleNewGUI(ev.Player));
             else
                 PressingAltVCKey.Remove(ev.Player);
