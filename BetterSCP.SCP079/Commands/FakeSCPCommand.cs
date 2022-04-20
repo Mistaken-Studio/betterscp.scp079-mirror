@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using CommandSystem;
 using Exiled.API.Features;
+using Exiled.API.Features.Roles;
 using Mistaken.API.Commands;
 using Mistaken.API.Extensions;
 using Mistaken.RoundLogger;
@@ -48,14 +49,15 @@ namespace Mistaken.BetterSCP.SCP079.Commands
         public override string[] Execute(ICommandSender sender, string[] args, out bool success)
         {
             var player = sender.GetPlayer();
+            var scp = (Scp079Role)player.Role;
             success = false;
             if (player.Role != RoleType.Scp079)
                 return new string[] { "Only SCP 079" };
 
-            if (player.Level < ReqLvl - 1)
+            if (scp.Level < ReqLvl - 1)
                 return new string[] { PluginHandler.Instance.Translation.FailedLvl.Replace("${lvl}", ReqLvl.ToString()) };
 
-            if (player.Energy < Cost)
+            if (scp.Energy < Cost)
                 return new string[] { PluginHandler.Instance.Translation.FailedAP.Replace("${ap}", Cost.ToString()) };
 
             if (!SCP079Handler.IsGlobalReady)
@@ -119,7 +121,7 @@ namespace Mistaken.BetterSCP.SCP079.Commands
                 List<Subtitles.SubtitlePart> subtitles = new List<Subtitles.SubtitlePart>(1);
                 if (reason == FakeSCPDeathCause.RECONTAINMENT)
                     processedtonumber = "1 0 6";
-                subtitles.Add(new Subtitles.SubtitlePart(Subtitles.SubtitleType.SCP, new string[] { "SCP-" + processedtonumber.Replace(" ", string.Empty) }));
+                subtitles.Add(new Subtitles.SubtitlePart(Subtitles.SubtitleType.SCP, new string[] { processedtonumber.Replace(" ", string.Empty) }));
                 switch (reason)
                 {
                     case FakeSCPDeathCause.TESLA:
@@ -140,6 +142,7 @@ namespace Mistaken.BetterSCP.SCP079.Commands
                         break;
                     case FakeSCPDeathCause.RECONTAINMENT:
                         Cassie.Message("SCP 1 0 6 RECONTAINED SUCCESSFULLY");
+                        subtitles.Add(new Subtitles.SubtitlePart(Subtitles.SubtitleType.Custom, new string[] { "RECONTAINED SUCCESSFULLY" }));
                         break;
                     case FakeSCPDeathCause.DECONTAMINATION:
                         Cassie.Message("SCP " + processedtonumber + " LOST IN DECONTAMINATION SEQUENCE");

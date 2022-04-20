@@ -7,6 +7,7 @@
 using System;
 using CommandSystem;
 using Exiled.API.Features;
+using Exiled.API.Features.Roles;
 using Mistaken.API;
 using Mistaken.API.Commands;
 using Mistaken.API.Extensions;
@@ -31,6 +32,7 @@ namespace Mistaken.BetterSCP.SCP079.Commands
         public override string[] Execute(ICommandSender sender, string[] args, out bool success)
         {
             var player = sender.GetPlayer();
+            var scp = (Scp079Role)player.Role;
             success = false;
             if (player.Role != RoleType.Scp079)
                 return new string[] { "Only SCP 079" };
@@ -39,10 +41,10 @@ namespace Mistaken.BetterSCP.SCP079.Commands
             if (Warhead.IsLocked || BetterWarheadHandler.Warhead.StopLock)
                 return new string[] { "Warhead is locked" };
 
-            if (player.Level < ReqLvl - 1)
+            if (scp.Level < ReqLvl - 1)
                 return new string[] { PluginHandler.Instance.Translation.FailedLvl.Replace("${lvl}", ReqLvl.ToString()) };
 
-            if (player.Energy < Cost)
+            if (scp.Energy < Cost)
                 return new string[] { PluginHandler.Instance.Translation.FailedAP.Replace("${ap}", Cost.ToString()) };
 
             if (!IsReady)

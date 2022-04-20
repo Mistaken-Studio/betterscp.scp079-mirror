@@ -3,7 +3,7 @@
 // Copyright (c) Mistaken. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
-
+/*
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
@@ -46,7 +46,7 @@ namespace Mistaken.BetterSCP.SCP079
                     new CodeInstruction(OpCodes.Ldloc, player), // [Player]
                     new CodeInstruction(OpCodes.Brfalse_S, continueLabel), // []
 
-                    // if (player.Role != RoleType.SCP079) return
+                    // if (player.Role != RoleType.SCP079) return;
                     new CodeInstruction(OpCodes.Ldloc, player), // [Player]
                     new CodeInstruction(OpCodes.Callvirt, AccessTools.PropertyGetter(typeof(Player), nameof(Player.Role))), // [RoleType]
                     new CodeInstruction(OpCodes.Conv_I1), // [sbyte]
@@ -70,3 +70,4 @@ namespace Mistaken.BetterSCP.SCP079
         }
     }
 }
+*/
