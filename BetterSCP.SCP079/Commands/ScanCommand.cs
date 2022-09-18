@@ -34,7 +34,7 @@ namespace Mistaken.BetterSCP.SCP079.Commands
             var player = sender.GetPlayer();
             var scp = (Scp079Role)player.Role;
             success = false;
-            if (player.Role != RoleType.Scp079)
+            if (player.Role.Type != RoleType.Scp079)
                 return new string[] { "Only SCP 079" };
 
             if (scp.Level < ReqLvl - 1)
@@ -53,7 +53,7 @@ namespace Mistaken.BetterSCP.SCP079.Commands
             int scp049 = 0;
             int pocket = 0;
             int surface = 0;
-            foreach (var item in RealPlayers.List.Where(x => x.IsAlive))
+            foreach (var item in RealPlayers.List.Where(x => x.IsAlive && x.Role.Type != RoleType.Tutorial))
             {
                 if (item.IsInPocketDimension)
                     pocket++;
@@ -61,9 +61,9 @@ namespace Mistaken.BetterSCP.SCP079.Commands
                     surface++;
                 else if (item.Position.y > -100)
                     lcz++;
-                else if (item.Position.y > -500)
+                else if (item.Position.y > -600)
                     nuke++;
-                else if (item.Position.y > -700)
+                else if (item.Position.y > -800)
                     scp049++;
                 else if (item.CurrentRoom.Zone == Exiled.API.Enums.ZoneType.Entrance)
                     ez++;
