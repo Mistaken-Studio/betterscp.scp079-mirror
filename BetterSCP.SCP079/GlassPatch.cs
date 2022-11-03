@@ -4,15 +4,11 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
-using Assets._Scripts.Dissonance;
 using Exiled.API.Features;
 using HarmonyLib;
-using MEC;
-using Mistaken.API;
 using NorthwoodLib.Pools;
 using UnityEngine;
 
@@ -25,10 +21,10 @@ namespace Mistaken.BetterSCP.SCP079
     {
         internal static void Reload()
         {
-            window = GameObject.FindObjectOfType<Recontainer079>()._activatorGlass;
+            _window = Object.FindObjectOfType<Recontainer079>()._activatorGlass;
         }
 
-        private static BreakableWindow window;
+        private static BreakableWindow _window;
 
         private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
         {
@@ -37,27 +33,25 @@ namespace Mistaken.BetterSCP.SCP079
             Label label = generator.DefineLabel();
 
             newInstructions[0].WithLabels(continueLabel);
-            newInstructions.InsertRange(
-                0,
-                new CodeInstruction[]
-                {
-                    new CodeInstruction(OpCodes.Ldarg_0),
-                    new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(GlassPatch), nameof(GlassPatch.window))),
-                    new CodeInstruction(OpCodes.Beq_S, label),
-                    new CodeInstruction(OpCodes.Br_S, continueLabel),
-                    new CodeInstruction(OpCodes.Nop).WithLabels(label),
 
-                    new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(GlassPatch), nameof(GlassPatch.ActiveGenerators))),
-                    new CodeInstruction(OpCodes.Ldc_I4_3),
-                    new CodeInstruction(OpCodes.Beq_S, continueLabel),
-                    new CodeInstruction(OpCodes.Ret),
-                });
+            newInstructions.InsertRange(0, new CodeInstruction[]
+            {
+                new CodeInstruction(OpCodes.Ldarg_0),
+                new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(GlassPatch), nameof(_window))),
+                new CodeInstruction(OpCodes.Beq_S, label),
+                new CodeInstruction(OpCodes.Br_S, continueLabel),
+                new CodeInstruction(OpCodes.Nop).WithLabels(label),
 
-            for (int z = 0; z < newInstructions.Count; z++)
-                yield return newInstructions[z];
+                new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(GlassPatch), nameof(GlassPatch.ActiveGenerators))),
+                new CodeInstruction(OpCodes.Ldc_I4_3),
+                new CodeInstruction(OpCodes.Beq_S, continueLabel),
+                new CodeInstruction(OpCodes.Ret),
+            });
+
+            foreach (var instruction in newInstructions)
+                yield return instruction;
 
             ListPool<CodeInstruction>.Shared.Return(newInstructions);
-            yield break;
         }
 
         private static int ActiveGenerators()

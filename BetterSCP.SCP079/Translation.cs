@@ -8,8 +8,7 @@ using Exiled.API.Interfaces;
 
 namespace Mistaken.BetterSCP.SCP079
 {
-    /// <inheritdoc/>
-    internal class Translation : ITranslation
+    internal sealed class Translation : ITranslation
     {
         public string Success { get; set; } = "Done";
 

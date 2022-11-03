@@ -6,7 +6,6 @@
 
 using System;
 using CommandSystem;
-using Exiled.API.Features;
 using Exiled.API.Features.Roles;
 using Mistaken.API.Commands;
 using Mistaken.API.Extensions;
@@ -14,26 +13,20 @@ using Mistaken.RoundLogger;
 
 namespace Mistaken.BetterSCP.SCP079.Commands
 {
-    /// <inheritdoc/>
-    [CommandSystem.CommandHandler(typeof(CommandSystem.ClientCommandHandler))]
-    public class CassieCommand : IBetterCommand
+    [CommandHandler(typeof(ClientCommandHandler))]
+    internal sealed class CassieCommand : IBetterCommand
     {
-        /// <inheritdoc/>
         public override string Command => "cassie";
 
-        /// <inheritdoc/>
-        public override string[] Aliases => new string[] { };
-
-        /// <inheritdoc/>
         public override string Description => "Play custom cassie";
 
-        /// <inheritdoc/>
         public override string[] Execute(ICommandSender sender, string[] args, out bool success)
         {
             var player = sender.GetPlayer();
             var scp = (Scp079Role)player.Role;
             success = false;
-            if (player.Role != RoleType.Scp079)
+
+            if (player.Role.Type != RoleType.Scp079)
                 return new string[] { "Only SCP 079" };
 
             if (scp.Level < ReqLvl - 1)
@@ -49,8 +42,10 @@ namespace Mistaken.BetterSCP.SCP079.Commands
                 return new string[] { "Usage: " + this.GetUsage() };
 
             string message = string.Join(" ", args);
+
             if (args.Length > 20 || message.Length > 250)
                 return new string[] { "Wiadomość nie może być dłuższa niż 20 słów i max 250 znaków licząc spację" };
+
             message = message.ToLower();
             while (message.Contains("jam_"))
                 message = message.Replace("jam_", string.Empty);
@@ -68,8 +63,8 @@ namespace Mistaken.BetterSCP.SCP079.Commands
             Events.EventHandler.OnUseCassie(new Events.SCP079UseCassieEventArgs(player, message));
 
             Respawning.RespawnEffectsController.PlayCassieAnnouncement("PITCH_0.9 SCP 0 PITCH_0.9 7 PITCH_0.9 9 PITCH_0.9 jam_050_5 OVERRIDE PITCH_1 . . . " + message, false, false, true);
-            SCP079Handler.GainXP(player, Cost);
-            lastUse = DateTime.Now;
+            scp.Energy -= Cost;
+            _lastUse = DateTime.Now;
             RLogger.Log("SCP079 EVENT", "CASSIE", $"{player.PlayerToString()} requested cassie \"{message}\"");
 
             success = true;
@@ -82,11 +77,11 @@ namespace Mistaken.BetterSCP.SCP079.Commands
 
         internal static float ReqLvl => PluginHandler.Instance.Config.RequiedLvlCassie;
 
-        internal static bool IsReady => lastUse.AddSeconds(Cooldown).Ticks <= DateTime.Now.Ticks;
+        internal static bool IsReady => _lastUse.AddSeconds(Cooldown).Ticks <= DateTime.Now.Ticks;
 
-        internal static long TimeLeft => lastUse.AddSeconds(Cooldown).Ticks - DateTime.Now.Ticks;
+        internal static long TimeLeft => _lastUse.AddSeconds(Cooldown).Ticks - DateTime.Now.Ticks;
 
-        private static DateTime lastUse = default(DateTime);
+        private static DateTime _lastUse = default;
 
         private string GetUsage()
         {

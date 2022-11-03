@@ -8,48 +8,33 @@ using System;
 using Exiled.API.Enums;
 using Exiled.API.Features;
 using HarmonyLib;
+using Mistaken.Updater.API.Config;
 
 namespace Mistaken.BetterSCP.SCP079
 {
-    /// <inheritdoc/>
-    internal class PluginHandler : Plugin<Config, Translation>
+    internal sealed class PluginHandler : Plugin<Config, Translation>, IAutoUpdateablePlugin
     {
-        /// <inheritdoc/>
         public override string Author => "Mistaken Devs";
 
-        /// <inheritdoc/>
         public override string Name => "BetterSCP.SCP079";
 
-        /// <inheritdoc/>
         public override string Prefix => "MSCP079";
 
-        /// <inheritdoc/>
         public override PluginPriority Priority => PluginPriority.Default;
 
-        /// <inheritdoc/>
-        public override Version RequiredExiledVersion => new Version(5, 0, 0);
+        public override Version RequiredExiledVersion => new(5, 2, 2);
 
-#pragma warning disable SA1202 // Elements should be ordered by access
-        private Version version;
-
-        /// <inheritdoc/>
-        public override Version Version
+        public AutoUpdateConfig AutoUpdateConfig => new()
         {
-            get
-            {
-                if (this.version == null)
-                    this.version = this.Assembly.GetName().Version;
-                return this.version;
-            }
-        }
-#pragma warning restore SA1202 // Elements should be ordered by access
+            Type = SourceType.GITLAB,
+            Url = "https://git.mistaken.pl/api/v4/projects/45",
+        };
 
-        /// <inheritdoc/>
         public override void OnEnabled()
         {
             Instance = this;
 
-            new Harmony("mistaken.betterscp.scp079").PatchAll();
+            _harmony.PatchAll();
 
             new SCP079Handler(this);
 
@@ -58,14 +43,17 @@ namespace Mistaken.BetterSCP.SCP079
             base.OnEnabled();
         }
 
-        /// <inheritdoc/>
         public override void OnDisabled()
         {
+            _harmony.UnpatchAll();
+
             API.Diagnostics.Module.OnDisable(this);
 
             base.OnDisabled();
         }
 
         internal static PluginHandler Instance { get; private set; }
+
+        private static readonly Harmony _harmony = new("mistaken.betterscp.scp079");
     }
 }

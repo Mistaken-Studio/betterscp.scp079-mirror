@@ -17,41 +17,20 @@ using Utils.Networking;
 
 namespace Mistaken.BetterSCP.SCP079.Commands
 {
-    /// <inheritdoc/>
-    [CommandSystem.CommandHandler(typeof(CommandSystem.ClientCommandHandler))]
-    public class FakeSCPCommand : IBetterCommand
+    [CommandHandler(typeof(ClientCommandHandler))]
+    internal sealed class FakeSCPCommand : IBetterCommand
     {
-        /// <summary>
-        /// Cause of death used for fake SCP.
-        /// </summary>
-        public enum FakeSCPDeathCause
-        {
-#pragma warning disable CS1591 // Brak komentarza XML dla widocznego publicznie typu lub składowej
-            TESLA = 1,
-            CHAOS,
-            CLASSD,
-            UNKNOWN,
-            RECONTAINMENT,
-            DECONTAMINATION,
-#pragma warning restore CS1591 // Brak komentarza XML dla widocznego publicznie typu lub składowej
-        }
-
-        /// <inheritdoc/>
         public override string Command => "fakescp";
 
-        /// <inheritdoc/>
-        public override string[] Aliases => new string[] { };
-
-        /// <inheritdoc/>
         public override string Description => "Fake SCP";
 
-        /// <inheritdoc/>
         public override string[] Execute(ICommandSender sender, string[] args, out bool success)
         {
             var player = sender.GetPlayer();
             var scp = (Scp079Role)player.Role;
             success = false;
-            if (player.Role != RoleType.Scp079)
+
+            if (player.Role.Type != RoleType.Scp079)
                 return new string[] { "Only SCP 079" };
 
             if (scp.Level < ReqLvl - 1)
@@ -84,6 +63,7 @@ namespace Mistaken.BetterSCP.SCP079.Commands
             FakeSCPDeathCause reason = (FakeSCPDeathCause)rawReason;
 
             args = args.Skip(1).ToArray();
+
             if (args.Length == 0)
             {
                 int max = short.MaxValue;
@@ -101,7 +81,9 @@ namespace Mistaken.BetterSCP.SCP079.Commands
             {
                 if (!short.TryParse(processed, out _))
                     return new string[] { PluginHandler.Instance.Translation.FailedWrongNumber.Replace("${max}", short.MaxValue.ToString()) };
+
                 string processedtonumber = " ";
+
                 foreach (char item in processed.ToCharArray())
                 {
                     if (item != ' ')
@@ -118,10 +100,13 @@ namespace Mistaken.BetterSCP.SCP079.Commands
 
                 Events.EventHandler.OnUseFakeSCP(new Events.SCP079UseFakeSCPEventArgs(player, processedtonumber, reason));
 
-                List<Subtitles.SubtitlePart> subtitles = new List<Subtitles.SubtitlePart>(1);
+                List<Subtitles.SubtitlePart> subtitles = new(1);
+
                 if (reason == FakeSCPDeathCause.RECONTAINMENT)
                     processedtonumber = "1 0 6";
+
                 subtitles.Add(new Subtitles.SubtitlePart(Subtitles.SubtitleType.SCP, new string[] { processedtonumber.Replace(" ", string.Empty) }));
+
                 switch (reason)
                 {
                     case FakeSCPDeathCause.TESLA:
@@ -129,7 +114,7 @@ namespace Mistaken.BetterSCP.SCP079.Commands
                         subtitles.Add(new Subtitles.SubtitlePart(Subtitles.SubtitleType.TerminatedBySecuritySystem, new string[0]));
                         break;
                     case FakeSCPDeathCause.CHAOS:
-                        Cassie.Message("SCP " + processedtonumber + " SUCCESSFULLY TERMINATED BY CHAOSINSURGENCY");
+                        Cassie.Message("SCP " + processedtonumber + " CONTAINEDSUCCESSFULLY BY CHAOSINSURGENCY");
                         subtitles.Add(new Subtitles.SubtitlePart(Subtitles.SubtitleType.ContainedByChaos, new string[0]));
                         break;
                     case FakeSCPDeathCause.CLASSD:
@@ -152,9 +137,9 @@ namespace Mistaken.BetterSCP.SCP079.Commands
 
                 new Subtitles.SubtitleMessage(subtitles.ToArray()).SendToAuthenticated(0);
 
-                SCP079Handler.lastGlobalUse = DateTime.Now;
-                SCP079Handler.GainXP(player, Cost);
-                lastUse = DateTime.Now;
+                SCP079Handler.LastGlobalUse = DateTime.Now;
+                scp.Energy -= Cost;
+                _lastUse = DateTime.Now;
 
                 RLogger.Log("SCP079 EVENT", "FAKESCP", $"{player.PlayerToString()} requested fakescp of SCP {processedtonumber} with reason: {reason}");
 
@@ -174,15 +159,10 @@ namespace Mistaken.BetterSCP.SCP079.Commands
 
         internal static float ReqLvl => PluginHandler.Instance.Config.RequiedLvl;
 
-        internal static bool IsReady => lastUse.AddSeconds(Cooldown).Ticks <= DateTime.Now.Ticks;
+        internal static bool IsReady => _lastUse.AddSeconds(Cooldown).Ticks <= DateTime.Now.Ticks;
 
-        internal static long TimeLeft => lastUse.AddSeconds(Cooldown).Ticks - DateTime.Now.Ticks;
+        internal static long TimeLeft => _lastUse.AddSeconds(Cooldown).Ticks - DateTime.Now.Ticks;
 
-        private static DateTime lastUse = default(DateTime);
-
-        private string GetUsage()
-        {
-            return ".fakescp [powód(liczba)] [scp]";
-        }
+        private static DateTime _lastUse = default;
     }
 }

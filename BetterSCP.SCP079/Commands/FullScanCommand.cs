@@ -7,7 +7,6 @@
 using System;
 using System.Linq;
 using CommandSystem;
-using Exiled.API.Features;
 using Exiled.API.Features.Roles;
 using Mistaken.API;
 using Mistaken.API.Commands;
@@ -16,25 +15,19 @@ using Mistaken.RoundLogger;
 
 namespace Mistaken.BetterSCP.SCP079.Commands
 {
-    /// <inheritdoc/>
-    [CommandSystem.CommandHandler(typeof(CommandSystem.ClientCommandHandler))]
-    public class FullScanCommand : IBetterCommand
+    [CommandHandler(typeof(ClientCommandHandler))]
+    internal sealed class FullScanCommand : IBetterCommand
     {
-        /// <inheritdoc/>
         public override string Command => "fullscan";
 
-        /// <inheritdoc/>
-        public override string[] Aliases => new string[] { };
-
-        /// <inheritdoc/>
         public override string Description => "Full Scanning";
 
-        /// <inheritdoc/>
         public override string[] Execute(ICommandSender sender, string[] args, out bool success)
         {
             var player = sender.GetPlayer();
             var scp = (Scp079Role)player.Role;
             success = false;
+
             if (player.Role.Type != RoleType.Scp079)
                 return new string[] { "Only SCP 079" };
 
@@ -96,8 +89,8 @@ namespace Mistaken.BetterSCP.SCP079.Commands
             else
                 Respawning.RespawnEffectsController.PlayCassieAnnouncement("DETECTED UNKNOWN SECURITY SYSTEM ERROR . FAILED TO SCAN", false, false, true);
 
-            SCP079Handler.GainXP(player, Cost);
-            lastUse = DateTime.Now;
+            scp.Energy -= Cost;
+            _lastUse = DateTime.Now;
 
             RLogger.Log("SCP079 EVENT", "FULLSCAN", $"{player.PlayerToString()} requested fullscan");
             success = true;
@@ -110,10 +103,10 @@ namespace Mistaken.BetterSCP.SCP079.Commands
 
         internal static float ReqLvl => PluginHandler.Instance.Config.RequiedLvl;
 
-        internal static bool IsReady => lastUse.AddSeconds(Cooldown).Ticks <= DateTime.Now.Ticks;
+        internal static bool IsReady => _lastUse.AddSeconds(Cooldown).Ticks <= DateTime.Now.Ticks;
 
-        internal static long TimeLeft => lastUse.AddSeconds(Cooldown).Ticks - DateTime.Now.Ticks;
+        internal static long TimeLeft => _lastUse.AddSeconds(Cooldown).Ticks - DateTime.Now.Ticks;
 
-        private static DateTime lastUse = default(DateTime);
+        private static DateTime _lastUse = default;
     }
 }

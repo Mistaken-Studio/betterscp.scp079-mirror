@@ -10,7 +10,7 @@ using static Mistaken.BetterSCP.SCP079.Commands.FakeSCPCommand;
 
 namespace Mistaken.BetterSCP.SCP079.Events
 {
-    public class SCP079UseFakeSCPEventArgs : SCP079UseEventArgs
+    public sealed class SCP079UseFakeSCPEventArgs : SCP079UseEventArgs
     {
         /// <summary>
         /// Gets sCP Number.

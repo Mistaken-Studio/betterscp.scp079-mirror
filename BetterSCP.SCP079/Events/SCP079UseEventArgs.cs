@@ -6,7 +6,6 @@
 
 using System;
 using Exiled.API.Features;
-using Exiled.Events.Extensions;
 
 namespace Mistaken.BetterSCP.SCP079.Events
 {

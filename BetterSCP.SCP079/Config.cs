@@ -5,21 +5,16 @@
 // -----------------------------------------------------------------------
 
 using System.ComponentModel;
-using Mistaken.Updater.Config;
+using Exiled.API.Interfaces;
 
 namespace Mistaken.BetterSCP.SCP079
 {
-    /// <inheritdoc/>
-    internal class Config : IAutoUpdatableConfig
+    internal sealed class Config : IConfig
     {
-        /// <inheritdoc/>
         public bool IsEnabled { get; set; } = true;
 
-        /// <summary>
-        /// Gets or sets a value indicating whether debug should be displayed.
-        /// </summary>
         [Description("If true then debug will be displayed")]
-        public bool VerbouseOutput { get; set; }
+        public bool VerboseOutput { get; set; }
 
         public int RequiedLvl { get; set; } = 3;
 
@@ -62,15 +57,5 @@ namespace Mistaken.BetterSCP.SCP079
         public float AdvancedScanUpdateRate { get; set; } = 0.1f;
 
         public int GlobalCooldown { get; set; } = 10;
-
-        /// <inheritdoc/>
-        [Description("Auto Update Settings")]
-        public System.Collections.Generic.Dictionary<string, string> AutoUpdateConfig { get; set; } = new System.Collections.Generic.Dictionary<string, string>
-        {
-            { "Url", "https://git.mistaken.pl/api/v4/projects/45" },
-            { "Token", string.Empty },
-            { "Type", "GITLAB" },
-            { "VerbouseOutput", "false" },
-        };
     }
 }
