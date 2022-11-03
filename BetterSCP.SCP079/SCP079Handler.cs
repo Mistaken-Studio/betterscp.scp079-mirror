@@ -18,29 +18,31 @@ using UnityEngine;
 
 namespace Mistaken.BetterSCP.SCP079
 {
-    internal class SCP079Handler : Module
+    internal sealed class SCP079Handler : Module
     {
         public static float GlobalCooldown => PluginHandler.Instance.Config.GlobalCooldown;
 
-        public static bool IsGlobalReady => lastGlobalUse.AddSeconds(GlobalCooldown).Ticks <= DateTime.Now.Ticks;
+        public static bool IsGlobalReady => LastGlobalUse.AddSeconds(GlobalCooldown).Ticks <= DateTime.Now.Ticks;
 
-        public static long GlobalTimeLeft => lastGlobalUse.AddSeconds(GlobalCooldown).Ticks - DateTime.Now.Ticks;
+        public static long GlobalTimeLeft => LastGlobalUse.AddSeconds(GlobalCooldown).Ticks - DateTime.Now.Ticks;
 
-        public static DateTime lastGlobalUse = default(DateTime);
+        public static DateTime LastGlobalUse { get; set; } = default;
 
-        public static void GainXP(Player player, float ap)
+        /*public static void GainXP(Player player, float ap)
         {
             var scp = (Scp079Role)player.Role;
             scp.Energy -= ap;
             var id = scp.Level;
+
             if (id >= scp.Levels.Length)
                 id = (byte)(scp.Levels.Length - 1);
             else if (id < 0)
                 id = 0;
+
             float num4 = 1f / Mathf.Clamp(scp.Levels[id].manaPerSecond / 1.5f, 1f, 5f);
             ap = Mathf.Round(ap * num4 * 10f) / 10f;
             player.ReferenceHub.scp079PlayerScript.AddExperience(ap);
-        }
+        }*/
 
         public SCP079Handler(PluginHandler plugin)
             : base(plugin)
@@ -72,10 +74,10 @@ namespace Mistaken.BetterSCP.SCP079
             if (value)
                 MEC.Timing.RunCoroutine(HandleNewGUI(player));
             else
-                PressingAltVCKey.Remove(player);
+                _pressingAltVCKey.Remove(player);
         }*/
 
-        private static readonly HashSet<Player> PressingAltVCKey = new HashSet<Player>();
+        private static readonly HashSet<Player> _pressingAltVCKey = new();
 
         private static float MapScan_CostPerStart => PluginHandler.Instance.Config.ApStartCostAdvancedScan;
 
@@ -90,32 +92,37 @@ namespace Mistaken.BetterSCP.SCP079
         private static IEnumerator<float> HandleNewGUI(Player player)
         {
             var scp = (Scp079Role)player.Role;
+
             if (scp.Level < MapScan_RequiedLvl)
                 yield break;
 
             if (scp.Energy < MapScan_CostPerStart)
                 yield break;
-            PressingAltVCKey.Add(player);
+
+            _pressingAltVCKey.Add(player);
             scp.Energy -= MapScan_CostPerStart;
-            List<Vector3> lastData = new List<Vector3>();
-            while (PressingAltVCKey.Contains(player))
+            List<Vector3> lastData = new();
+
+            while (_pressingAltVCKey.Contains(player))
             {
                 if (scp.Energy < MapScan_CostPerUpdate)
                     break;
+
                 scp.Energy -= MapScan_CostPerUpdate;
                 lastData = RealPlayers.List.Where(x => x.IsAlive).Select(x => x.Position).ToList();
                 player.ReferenceHub.scp079PlayerScript.TargetSetupIndicators(player.Connection, lastData);
                 yield return MEC.Timing.WaitForSeconds(MapScan_UpdateRate);
             }
 
-            PressingAltVCKey.Remove(player);
+            _pressingAltVCKey.Remove(player);
+
             for (int i = 0; i < MapScan_DisableDelay / MapScan_UpdateRate; i++)
             {
                 player.ReferenceHub.scp079PlayerScript.TargetSetupIndicators(player.Connection, lastData);
                 yield return MEC.Timing.WaitForSeconds(MapScan_UpdateRate);
             }
 
-            player.ReferenceHub.scp079PlayerScript.TargetSetupIndicators(player.Connection, new List<Vector3>());
+            player.ReferenceHub.scp079PlayerScript.TargetSetupIndicators(player.Connection, new());
         }
 
         private void Server_RoundStarted()
@@ -128,20 +135,23 @@ namespace Mistaken.BetterSCP.SCP079
         {
             if (ev.Player is null)
                 return;
+
             if (ev.Player.Role.Type != RoleType.Scp079)
                 return;
+
             ev.Player.ReferenceHub.dissonanceUserSetup.MimicAs939 = false;
 
             if (ev.IsTransmitting)
                 MEC.Timing.RunCoroutine(HandleNewGUI(ev.Player));
             else
-                PressingAltVCKey.Remove(ev.Player);
+                _pressingAltVCKey.Remove(ev.Player);
         }
 
         private IEnumerator<float> UpdateGeneratorsTimer()
         {
             yield return MEC.Timing.WaitForSeconds(30);
             int rid = RoundPlus.RoundId;
+
             while (Round.IsStarted && rid == RoundPlus.RoundId)
             {
                 string msg = string.Empty;
@@ -164,8 +174,10 @@ namespace Mistaken.BetterSCP.SCP079
                         if (generator.Activating)
                         {
                             generators++;
+
                             if ((nearestGenerator?.Network_syncTime ?? float.MaxValue) > generator.Network_syncTime)
                                 nearestGenerator = generator;
+
                             gens.Add(generator);
                         }
                     }

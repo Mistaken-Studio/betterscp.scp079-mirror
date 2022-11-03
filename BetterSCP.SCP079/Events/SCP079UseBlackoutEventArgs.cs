@@ -4,13 +4,11 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-using System;
 using Exiled.API.Features;
-using Exiled.Events.Extensions;
 
 namespace Mistaken.BetterSCP.SCP079.Events
 {
-    public class SCP079UseBlackoutEventArgs : SCP079UseEventArgs
+    public sealed class SCP079UseBlackoutEventArgs : SCP079UseEventArgs
     {
         public float Length { get; }
 

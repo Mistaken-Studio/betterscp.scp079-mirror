@@ -8,37 +8,34 @@ using System;
 using CommandSystem;
 using Exiled.API.Features;
 using Exiled.API.Features.Roles;
-using Mistaken.API;
 using Mistaken.API.Commands;
 using Mistaken.API.Extensions;
 using Mistaken.RoundLogger;
 
 namespace Mistaken.BetterSCP.SCP079.Commands
 {
-    /// <inheritdoc/>
-    [CommandSystem.CommandHandler(typeof(CommandSystem.ClientCommandHandler))]
-    public class StopWarheadCommand : IBetterCommand
+    [CommandHandler(typeof(ClientCommandHandler))]
+    internal sealed class StopWarheadCommand : IBetterCommand
     {
-        /// <inheritdoc/>
         public override string Command => "stop";
 
-        /// <inheritdoc/>
         public override string[] Aliases => new string[] { "warheadstop", "stopwarhead", "stopwh", "swarhead" };
 
-        /// <inheritdoc/>
         public override string Description => "Stop Warhead";
 
-        /// <inheritdoc/>
         public override string[] Execute(ICommandSender sender, string[] args, out bool success)
         {
             var player = sender.GetPlayer();
             var scp = (Scp079Role)player.Role;
             success = false;
-            if (player.Role != RoleType.Scp079)
+
+            if (player.Role.Type != RoleType.Scp079)
                 return new string[] { "Only SCP 079" };
+
             if (!Warhead.IsInProgress)
                 return new string[] { "Warhead is not detonating" };
-            if (Warhead.IsLocked || BetterWarheadHandler.Warhead.StopLock)
+
+            if (Warhead.IsLocked || API.Handlers.BetterWarheadHandler.Warhead.StopLock)
                 return new string[] { "Warhead is locked" };
 
             if (scp.Level < ReqLvl - 1)
@@ -54,8 +51,8 @@ namespace Mistaken.BetterSCP.SCP079.Commands
             Warhead.Stop();
             Warhead.LeverStatus = false;
             Respawning.RespawnEffectsController.PlayCassieAnnouncement("PITCH_0.8 You jam_070_3 will jam_050_5 .g5 no jam_040_9 detonate me", false, false, true);
-            SCP079Handler.GainXP(player, Cost);
-            lastUse = DateTime.Now;
+            scp.Energy -= Cost;
+            _lastUse = DateTime.Now;
 
             RLogger.Log("SCP079 EVENT", "STOPWARHEAD", $"{player.PlayerToString()} requested stopwarhead");
 
@@ -69,15 +66,10 @@ namespace Mistaken.BetterSCP.SCP079.Commands
 
         internal static float ReqLvl => PluginHandler.Instance.Config.RequiedLvlStopWarhead;
 
-        internal static bool IsReady => lastUse.AddSeconds(Cooldown).Ticks <= DateTime.Now.Ticks;
+        internal static bool IsReady => _lastUse.AddSeconds(Cooldown).Ticks <= DateTime.Now.Ticks;
 
-        internal static long TimeLeft => lastUse.AddSeconds(Cooldown).Ticks - DateTime.Now.Ticks;
+        internal static long TimeLeft => _lastUse.AddSeconds(Cooldown).Ticks - DateTime.Now.Ticks;
 
-        private static DateTime lastUse = default(DateTime);
-
-        private string GetUsage()
-        {
-            return ".stop";
-        }
+        private static DateTime _lastUse = default;
     }
 }

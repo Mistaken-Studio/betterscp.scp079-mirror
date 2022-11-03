@@ -4,13 +4,11 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-using System;
 using Exiled.API.Features;
-using Exiled.Events.Extensions;
 
 namespace Mistaken.BetterSCP.SCP079.Events
 {
-    public class SCP079UseStopEventArgs : SCP079UseEventArgs
+    public sealed class SCP079UseStopEventArgs : SCP079UseEventArgs
     {
         internal SCP079UseStopEventArgs(Player scp079, bool isAllowed = true)
             : base(scp079, isAllowed)

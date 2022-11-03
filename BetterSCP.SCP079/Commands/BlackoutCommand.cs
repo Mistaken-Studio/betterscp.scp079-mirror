@@ -14,23 +14,20 @@ using Mistaken.RoundLogger;
 
 namespace Mistaken.BetterSCP.SCP079.Commands
 {
-    /// <inheritdoc/>
-    [CommandSystem.CommandHandler(typeof(CommandSystem.ClientCommandHandler))]
-    public class BlackoutCommand : IBetterCommand
+    [CommandHandler(typeof(ClientCommandHandler))]
+    internal sealed class BlackoutCommand : IBetterCommand
     {
-        /// <inheritdoc/>
         public override string Command => "blackout";
 
-        /// <inheritdoc/>
         public override string Description => "Do blackout";
 
-        /// <inheritdoc/>
         public override string[] Execute(ICommandSender sender, string[] args, out bool success)
         {
             var player = sender.GetPlayer();
             var scp = (Scp079Role)player.Role;
             success = false;
-            if (player.Role != RoleType.Scp079)
+
+            if (player.Role.Type != RoleType.Scp079)
                 return new string[] { "Only SCP 079" };
 
             if (API.Utilities.Map.Overheat.LockBlackout)
@@ -40,12 +37,13 @@ namespace Mistaken.BetterSCP.SCP079.Commands
                 return new string[] { PluginHandler.Instance.Translation.FailedLvl.Replace("${lvl}", ReqLvl.ToString()) };
 
             if (!IsReady)
-                return new string[] { PluginHandler.Instance.Translation.FailedCooldownBlackout.Replace("${time}", this.lastCooldown.ToString()).Replace("${leftS}", (lastUse - DateTime.Now).TotalSeconds.ToString()) };
+                return new string[] { PluginHandler.Instance.Translation.FailedCooldownBlackout.Replace("${time}", _lastCooldown.ToString()).Replace("${leftS}", (_lastUse - DateTime.Now).TotalSeconds.ToString()) };
 
             if (args.Length == 0)
                 return new string[] { "Usage: " + this.GetUsage() };
 
             int duration;
+
             if (args[0].ToLower() == "max")
                 duration = (int)Math.Floor(scp.Energy / BlackoutCommand.Cost);
             else if (!int.TryParse(args[0], out duration))
@@ -65,11 +63,12 @@ namespace Mistaken.BetterSCP.SCP079.Commands
 
             Map.TurnOffAllLights(duration);
 
-            SCP079Handler.GainXP(player, toDrain);
-            lastUse = DateTime.Now.AddSeconds(cooldown);
-            this.lastCooldown = cooldown;
+            scp.Energy -= Cost;
+            _lastUse = DateTime.Now.AddSeconds(cooldown);
+            _lastCooldown = cooldown;
             RLogger.Log("SCP079 EVENT", "BLACKOUT", $"{player.PlayerToString()} requested blackout for {duration}s");
             success = true;
+
             return new string[] { PluginHandler.Instance.Translation.Success };
         }
 
@@ -79,12 +78,12 @@ namespace Mistaken.BetterSCP.SCP079.Commands
 
         internal static float ReqLvl => PluginHandler.Instance.Config.RequiedLvlBlackout;
 
-        internal static bool IsReady => lastUse.Ticks <= DateTime.Now.Ticks;
+        internal static bool IsReady => _lastUse.Ticks <= DateTime.Now.Ticks;
 
-        internal static long TimeLeft => lastUse.Ticks - DateTime.Now.Ticks;
+        internal static long TimeLeft => _lastUse.Ticks - DateTime.Now.Ticks;
 
-        private static DateTime lastUse = default;
-        private float lastCooldown;
+        private static DateTime _lastUse = default;
+        private static float _lastCooldown;
 
         private string GetUsage()
         {
