@@ -47,6 +47,9 @@ namespace Mistaken.BetterSCP.SCP079.Commands
             if (!IsReady)
                 return new string[] { PluginHandler.Instance.Translation.FailedCooldown.Replace("${time}", Cooldown.ToString()) };
 
+            if (Generator.List.All(x => x.IsEngaged))
+                return new string[] { PluginHandler.Instance.Translation.FailedAllGeneratorsEngaged };
+
             Events.EventHandler.OnUseFakeMTF(new Events.SCP079UseFakeMTFEventArgs(player));
 
             Respawning.NamingRules.UnitNamingRules.TryGetNamingRule(Respawning.SpawnableTeamType.NineTailedFox, out var ntfRule);

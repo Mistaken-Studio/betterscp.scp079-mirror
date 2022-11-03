@@ -5,6 +5,7 @@
 // -----------------------------------------------------------------------
 
 using System;
+using System.Linq;
 using CommandSystem;
 using Exiled.API.Features;
 using Exiled.API.Features.Roles;
@@ -65,6 +66,9 @@ namespace Mistaken.BetterSCP.SCP079.Commands
 
             if (!IsReady)
                 return new string[] { PluginHandler.Instance.Translation.FailedCooldown.Replace("${time}", Cooldown.ToString()) };
+
+            if (Generator.List.All(x => x.IsEngaged))
+                return new string[] { PluginHandler.Instance.Translation.FailedAllGeneratorsEngaged };
 
             Events.EventHandler.OnUseFakeCI(new Events.SCP079UseFakeCIEventArgs(player));
 
