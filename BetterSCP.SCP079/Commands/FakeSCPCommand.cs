@@ -45,6 +45,9 @@ namespace Mistaken.BetterSCP.SCP079.Commands
             if (!IsReady)
                 return new string[] { PluginHandler.Instance.Translation.FailedCooldown.Replace("${time}", Cooldown.ToString()) };
 
+            if (Generator.List.All(x => x.IsEngaged))
+                return new string[] { PluginHandler.Instance.Translation.FailedAllGeneratorsEngaged };
+
             if (args.Length == 0 || !int.TryParse(args[0], out int rawReason) || rawReason < 1 || rawReason > 6)
             {
                 return new string[]

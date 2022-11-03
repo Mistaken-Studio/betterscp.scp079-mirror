@@ -6,6 +6,7 @@
 
 using System;
 using CommandSystem;
+using Exiled.API.Features;
 using Exiled.API.Features.Roles;
 using Mistaken.API.Commands;
 using Mistaken.API.Extensions;
@@ -37,6 +38,9 @@ namespace Mistaken.BetterSCP.SCP079.Commands
 
             if (!IsReady)
                 return new string[] { PluginHandler.Instance.Translation.FailedCooldown.Replace("${time}", Cooldown.ToString()) };
+
+            if (Generator.List.All(x => x.IsEngaged))
+                return new string[] { PluginHandler.Instance.Translation.FailedAllGeneratorsEngaged };
 
             if (args.Length == 0)
                 return new string[] { "Usage: " + this.GetUsage() };
